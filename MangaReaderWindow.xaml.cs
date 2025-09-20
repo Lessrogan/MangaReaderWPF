@@ -32,6 +32,20 @@ namespace MangaReader
             UpdateFavoriteButton();
         }
 
+        public MangaReaderWindow(MangaInfo manga, int startPageIndex)
+        {
+            InitializeComponent();
+            mangaInfo = manga;
+            DataContext = manga;
+
+            // Initialiser les listes avant tout
+            imageFiles = new List<string>();
+            currentPageIndex = startPageIndex;
+
+            LoadMangaPages();
+            UpdateFavoriteButton();
+        }
+
         private void LoadMangaPages()
         {
             try
@@ -52,8 +66,7 @@ namespace MangaReader
 
                 // Initialiser les contrôles seulement après avoir chargé les images
                 PageSlider.Maximum = imageFiles.Count;
-                PageSlider.Value = 1;
-                currentPageIndex = 0;
+                PageSlider.Value = currentPageIndex + 1;
 
                 // Marquer comme initialisé AVANT les appels qui déclenchent des événements
                 isInitialized = true;

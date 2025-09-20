@@ -1,0 +1,299 @@
+﻿<Window x:Class="MangaReader.MangaDetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding Title, StringFormat='Détails - {0}'}" 
+        Height="800" Width="1200"
+        Background="#1a1a1a" 
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style x:Key="DetailButton" TargetType="Button">
+            <Setter Property="Background" Value="#2d2d30"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#404040"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="5"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#3d3d40"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MetadataLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,5,0,2"/>
+        </Style>
+
+        <Style x:Key="MetadataValue" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <Style x:Key="PageThumbnail" TargetType="Border">
+            <Setter Property="Background" Value="#2d2d30"/>
+            <Setter Property="BorderBrush" Value="#404040"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#007ACC"/>
+                    <Setter Property="Background" Value="#3d3d40"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- En-tête avec boutons d'action -->
+        <Border Grid.Row="0" Background="#1e1e1e" BorderBrush="#404040" BorderThickness="0,0,0,1" Padding="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Bouton Retour -->
+                <Button x:Name="BackButton" 
+                        Grid.Column="0"
+                        Style="{StaticResource DetailButton}"
+                        Click="BackButton_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="← Retour" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Titre -->
+                <TextBlock Grid.Column="1" 
+                           Text="{Binding Title}"
+                           Foreground="White" 
+                           FontSize="20" 
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"
+                           Margin="20,0"/>
+
+                <!-- Boutons d'action -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button x:Name="FavoriteButton" 
+                            Style="{StaticResource DetailButton}"
+                            Click="FavoriteButton_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="FavoriteButtonText" Text="☆" FontSize="16" Margin="0,0,5,0"/>
+                            <TextBlock Text="Favoris" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="ReadButton" 
+                            Style="{StaticResource DetailButton}"
+                            Click="ReadButton_Click"
+                            Background="#007ACC">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📖" FontSize="16" Margin="0,0,5,0"/>
+                            <TextBlock Text="Lire" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Contenu principal -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Section principale avec couverture et métadonnées -->
+                <Grid Grid.Row="0" Margin="0,0,0,30">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Image de couverture -->
+                    <Border Grid.Column="0" 
+                            Background="#2d2d30" 
+                            BorderBrush="#404040" 
+                            BorderThickness="1" 
+                            CornerRadius="8">
+                        <Image x:Name="CoverImage" 
+                               Source="{Binding CoverImage}"
+                               Stretch="Uniform"
+                               MaxHeight="400"/>
+                    </Border>
+
+                    <!-- Métadonnées -->
+                    <StackPanel Grid.Column="1" Margin="30,0,0,0">
+
+                        <!-- Auteur -->
+                        <TextBlock Text="Auteur" Style="{StaticResource MetadataLabel}"/>
+                        <TextBox x:Name="AuthorTextBox" 
+                                 Text="{Binding Author}" 
+                                 Background="#2d2d30"
+                                 Foreground="White"
+                                 BorderBrush="#404040"
+                                 Padding="8"
+                                 FontSize="12"
+                                 Margin="0,0,0,10"/>
+
+                        <!-- Tags -->
+                        <TextBlock Text="Tags" Style="{StaticResource MetadataLabel}"/>
+                        <TextBox x:Name="TagsTextBox" 
+                                 Text="{Binding Tags}"
+                                 Background="#2d2d30"
+                                 Foreground="White"
+                                 BorderBrush="#404040"
+                                 Padding="8"
+                                 FontSize="12"
+                                 Margin="0,0,0,10"
+                                 ToolTip="Séparez les tags par des virgules (ex: Action, Romance, Shonen)"/>
+
+                        <!-- Personnages -->
+                        <TextBlock Text="Personnages" Style="{StaticResource MetadataLabel}"/>
+                        <TextBox x:Name="CharactersTextBox" 
+                                 Text="{Binding Characters}"
+                                 Background="#2d2d30"
+                                 Foreground="White"
+                                 BorderBrush="#404040"
+                                 Padding="8"
+                                 FontSize="12"
+                                 Margin="0,0,0,10"
+                                 ToolTip="Séparez les personnages par des virgules"/>
+
+                        <!-- Description -->
+                        <TextBlock Text="Description" Style="{StaticResource MetadataLabel}"/>
+                        <TextBox x:Name="DescriptionTextBox" 
+                                 Text="{Binding Description}"
+                                 Background="#2d2d30"
+                                 Foreground="White"
+                                 BorderBrush="#404040"
+                                 Padding="8"
+                                 FontSize="12"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 Height="100"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 Margin="0,0,0,15"/>
+
+                        <!-- Informations techniques -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Nombre de pages" Style="{StaticResource MetadataLabel}"/>
+                                <TextBlock x:Name="PageCountText" Text="0 pages" Style="{StaticResource MetadataValue}"/>
+
+                                <TextBlock Text="Dernière lecture" Style="{StaticResource MetadataLabel}"/>
+                                <TextBlock Text="{Binding LastReadFormatted}" Style="{StaticResource MetadataValue}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Taille du dossier" Style="{StaticResource MetadataLabel}"/>
+                                <TextBlock x:Name="FolderSizeText" Text="Calcul..." Style="{StaticResource MetadataValue}"/>
+
+                                <TextBlock Text="Ajouté le" Style="{StaticResource MetadataLabel}"/>
+                                <TextBlock x:Name="AddedDateText" Text="Inconnu" Style="{StaticResource MetadataValue}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Bouton Sauvegarder -->
+                        <Button x:Name="SaveButton" 
+                                Style="{StaticResource DetailButton}"
+                                Click="SaveButton_Click"
+                                HorizontalAlignment="Left"
+                                Margin="0,10,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="💾" FontSize="16" Margin="0,0,5,0"/>
+                                <TextBlock Text="Sauvegarder les modifications" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Séparateur -->
+                <Separator Grid.Row="1" Background="#404040" Margin="0,0,0,20"/>
+
+                <!-- Aperçu des pages -->
+                <StackPanel Grid.Row="2">
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" 
+                                   Text="Aperçu des pages" 
+                                   Foreground="White" 
+                                   FontSize="16" 
+                                   FontWeight="SemiBold"/>
+
+                        <Button x:Name="ShowAllPagesButton"
+                                Grid.Column="1"
+                                Style="{StaticResource DetailButton}"
+                                Click="ShowAllPagesButton_Click">
+                            <TextBlock Text="Voir toutes les pages"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- Grille de miniatures -->
+                    <ItemsControl x:Name="PageThumbnailsControl">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource PageThumbnail}" 
+                                        Width="120" Height="160"
+                                        MouseLeftButtonDown="PageThumbnail_Click"
+                                        Tag="{Binding}">
+                                    <Grid>
+                                        <Image Source="{Binding Image}" 
+                                               Stretch="UniformToFill"/>
+                                        <Border Background="#80000000" 
+                                                VerticalAlignment="Bottom"
+                                                Padding="5,2">
+                                            <TextBlock Text="{Binding PageNumber}" 
+                                                       Foreground="White" 
+                                                       FontSize="10"
+                                                       HorizontalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Message de chargement -->
+                    <TextBlock x:Name="LoadingText" 
+                               Text="Chargement des miniatures..."
+                               Foreground="#888888"
+                               FontStyle="Italic"
+                               HorizontalAlignment="Center"
+                               Margin="20"/>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Window>

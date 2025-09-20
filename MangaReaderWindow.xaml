@@ -103,7 +103,8 @@
             <ScrollViewer x:Name="SinglePageScrollViewer" 
                           HorizontalScrollBarVisibility="Auto"
                           VerticalScrollBarVisibility="Auto"
-                         Visibility="Visible">
+                          CanContentScroll="True"
+                          Visibility="Visible">
                 <Image x:Name="CurrentPageImage" 
                        Stretch="Uniform"
                        Cursor="Hand"
@@ -114,6 +115,7 @@
             <ScrollViewer x:Name="DoublePageScrollViewer"
                           HorizontalScrollBarVisibility="Auto"
                           VerticalScrollBarVisibility="Auto"
+                          CanContentScroll="True"
                           Visibility="Collapsed">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Image x:Name="LeftPageImage" 
