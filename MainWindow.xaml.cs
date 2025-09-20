@@ -1,7 +1,9 @@
-﻿// MainWindow.xaml.cs
+﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
@@ -18,6 +20,9 @@ namespace MangaReader
         {
             InitializeComponent();
             InitializeApplication();
+
+            // Rafraîchir les récents quand la fenêtre redevient active
+            this.Activated += async (s, e) => await RefreshRecentMangas();
         }
 
         private async void InitializeApplication()
@@ -40,7 +45,7 @@ namespace MangaReader
                 AllMangasList.MouseLeftButtonUp += MangaCard_Click;
 
                 // Définir le dossier par défaut (à modifier selon vos besoins)
-                mangaFolderPath = @"E:\Utils\Mangas";
+                mangaFolderPath = @"E:\Utils\Mangas"; // Changez ce chemin
 
                 // Charger les mangas
                 await LoadMangasAsync();
@@ -59,6 +64,8 @@ namespace MangaReader
                 {
                     NoMangasText.Visibility = Visibility.Visible;
                     NoRecentMangasText.Visibility = Visibility.Visible;
+                    MessageBox.Show($"Le dossier de mangas n'existe pas : {mangaFolderPath}\n\nVeuillez vérifier le chemin dans le code (ligne 42).",
+                                  "Dossier introuvable", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -69,33 +76,44 @@ namespace MangaReader
                 // Parcourir les dossiers de mangas
                 var mangaDirectories = Directory.GetDirectories(mangaFolderPath);
 
+                if (mangaDirectories == null || mangaDirectories.Length == 0)
+                {
+                    NoMangasText.Visibility = Visibility.Visible;
+                    NoRecentMangasText.Visibility = Visibility.Visible;
+                    MessageBox.Show($"Aucun dossier trouvé dans : {mangaFolderPath}\n\nAjoutez des dossiers de mangas dans ce répertoire.",
+                                  "Aucun manga", MessageBoxButton.OK, MessageBoxImage.Information);
+                    UpdateUI();
+                    return;
+                }
+
                 foreach (var mangaDir in mangaDirectories)
                 {
-                    var mangaInfo = await CreateMangaInfoFromDirectory(mangaDir);
-                    if (mangaInfo != null)
+                    try
                     {
-                        allMangas.Add(mangaInfo);
+                        var mangaInfo = await CreateMangaInfoFromDirectory(mangaDir);
+                        if (mangaInfo != null)
+                        {
+                            allMangas.Add(mangaInfo);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Erreur lors du traitement du dossier {mangaDir}: {ex.Message}");
+                        // Continue avec les autres dossiers
                     }
                 }
 
                 // Charger les mangas récents depuis la base de données
-                var recentMangaInfos = await database.GetRecentMangasAsync(6);
-                foreach (var recentInfo in recentMangaInfos)
-                {
-                    var mangaInfo = allMangas.FirstOrDefault(m => m.FolderPath == recentInfo.FolderPath);
-                    if (mangaInfo != null)
-                    {
-                        mangaInfo.LastRead = recentInfo.LastRead;
-                        recentMangas.Add(mangaInfo);
-                    }
-                }
+                await RefreshRecentMangas();
 
                 // Mettre à jour l'interface
                 UpdateUI();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors du chargement des mangas : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erreur lors du chargement des mangas : {ex.Message}\n\nVérifiez :\n- Le chemin du dossier de mangas\n- Les permissions d'accès\n- La structure des dossiers",
+                              "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Diagnostics.Debug.WriteLine($"Erreur LoadMangasAsync: {ex}");
             }
         }
 
@@ -103,11 +121,26 @@ namespace MangaReader
         {
             try
             {
+                if (!Directory.Exists(mangaDir))
+                    return null;
+
                 var mangaName = Path.GetFileName(mangaDir);
+                if (string.IsNullOrEmpty(mangaName))
+                    return null;
+
                 var coverImagePath = FindCoverImage(mangaDir);
 
                 // Vérifier si le manga existe déjà dans la base de données
-                var existingManga = await database.GetMangaByPathAsync(mangaDir);
+                MangaInfo existingManga = null;
+                try
+                {
+                    existingManga = await database.GetMangaByPathAsync(mangaDir);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Erreur base de données pour {mangaDir}: {ex.Message}");
+                    // Continue sans les données de la DB
+                }
 
                 var mangaInfo = new MangaInfo
                 {
@@ -116,19 +149,31 @@ namespace MangaReader
                     FolderPath = mangaDir,
                     CoverImage = LoadImageFromPath(coverImagePath),
                     LastRead = existingManga?.LastRead,
-                    IsFavorite = existingManga?.IsFavorite ?? false
+                    IsFavorite = existingManga?.IsFavorite ?? false,
+                    Tags = existingManga?.Tags ?? "",
+                    Characters = existingManga?.Characters ?? "",
+                    Description = existingManga?.Description ?? ""
                 };
 
                 // Ajouter à la base de données si nouveau
                 if (existingManga == null)
                 {
-                    await database.AddMangaAsync(mangaInfo);
+                    try
+                    {
+                        await database.AddMangaAsync(mangaInfo);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Erreur ajout DB pour {mangaDir}: {ex.Message}");
+                        // Continue sans sauvegarder en DB
+                    }
                 }
 
                 return mangaInfo;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Erreur CreateMangaInfoFromDirectory pour {mangaDir}: {ex.Message}");
                 return null;
             }
         }
@@ -137,18 +182,24 @@ namespace MangaReader
         {
             try
             {
+                if (!Directory.Exists(mangaDir))
+                    return null;
+
                 var imageExtensions = new[] { "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp" };
 
                 foreach (var extension in imageExtensions)
                 {
                     var files = Directory.GetFiles(mangaDir, extension, SearchOption.AllDirectories);
-                    if (files.Length > 0)
+                    if (files != null && files.Length > 0)
                     {
                         return files.OrderBy(f => f).First(); // Prendre la première image par ordre alphabétique
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erreur FindCoverImage pour {mangaDir}: {ex.Message}");
+            }
 
             return null;
         }
@@ -157,7 +208,6 @@ namespace MangaReader
         {
             if (string.IsNullOrEmpty(imagePath) || !File.Exists(imagePath))
             {
-                // Retourner une image par défaut ou null
                 return null;
             }
 
@@ -178,21 +228,71 @@ namespace MangaReader
             }
         }
 
+        private async System.Threading.Tasks.Task RefreshRecentMangas()
+        {
+            try
+            {
+                // Vider la liste des récents
+                recentMangas.Clear();
+
+                // Recharger les mangas récents depuis la base de données
+                var recentMangaInfos = await database.GetRecentMangasAsync(6);
+                if (recentMangaInfos != null)
+                {
+                    foreach (var recentInfo in recentMangaInfos)
+                    {
+                        // Chercher le manga correspondant dans la liste complète
+                        var mangaInfo = allMangas.FirstOrDefault(m => m.FolderPath == recentInfo.FolderPath);
+                        if (mangaInfo != null)
+                        {
+                            // Mettre à jour la date de lecture
+                            mangaInfo.LastRead = recentInfo.LastRead;
+
+                            // Ajouter à la liste des récents (éviter les doublons)
+                            if (!recentMangas.Any(rm => rm.FolderPath == mangaInfo.FolderPath))
+                            {
+                                recentMangas.Add(mangaInfo);
+                            }
+                        }
+                    }
+                }
+
+                // Mettre à jour l'interface
+                UpdateUI();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erreur RefreshRecentMangas: {ex.Message}");
+            }
+        }
+
         private void UpdateUI()
         {
-            // Mettre à jour les compteurs
-            var totalCount = allMangas.Count;
-            var favoritesCount = allMangas.Count(m => m.IsFavorite);
-            var recentCount = recentMangas.Count;
+            try
+            {
+                // Mettre à jour les compteurs avec vérifications
+                var totalCount = allMangas?.Count ?? 0;
+                var favoritesCount = allMangas?.Count(m => m.IsFavorite) ?? 0;
+                var recentCount = recentMangas?.Count ?? 0;
 
-            TotalMangasText.Text = $"Total: {totalCount} mangas";
-            FavoritesCountText.Text = $"Favoris: {favoritesCount}";
-            RecentCountText.Text = $"Lus récemment: {recentCount}";
-            MangaCountText.Text = $"({totalCount} mangas)";
+                TotalMangasText.Text = $"Total: {totalCount} mangas";
+                FavoritesCountText.Text = $"Favoris: {favoritesCount}";
+                RecentCountText.Text = $"Lus récemment: {recentCount}";
+                MangaCountText.Text = $"({totalCount} mangas)";
 
-            // Afficher/masquer les messages
-            NoMangasText.Visibility = totalCount == 0 ? Visibility.Visible : Visibility.Collapsed;
-            NoRecentMangasText.Visibility = recentCount == 0 ? Visibility.Visible : Visibility.Collapsed;
+                // Afficher/masquer les messages
+                NoMangasText.Visibility = totalCount == 0 ? Visibility.Visible : Visibility.Collapsed;
+                NoRecentMangasText.Visibility = recentCount == 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erreur UpdateUI: {ex.Message}");
+                // Valeurs par défaut en cas d'erreur
+                TotalMangasText.Text = "Total: 0 mangas";
+                FavoritesCountText.Text = "Favoris: 0";
+                RecentCountText.Text = "Lus récemment: 0";
+                MangaCountText.Text = "(0 mangas)";
+            }
         }
 
         private async void MangaCard_Click(object sender, MouseButtonEventArgs e)
@@ -210,16 +310,13 @@ namespace MangaReader
         {
             try
             {
-                // Marquer comme lu récemment
-                mangaInfo.LastRead = DateTime.Now;
-                await database.UpdateLastReadAsync(mangaInfo.FolderPath, mangaInfo.LastRead.Value);
+                // Ouvrir la fenêtre de détails au lieu du lecteur directement
+                var detailsWindow = new MangaDetailsWindow(mangaInfo);
 
-                // Ouvrir la fenêtre de lecture
-                var readerWindow = new MangaReaderWindow(mangaInfo);
-                readerWindow.Show();
+                // Écouter la fermeture pour rafraîchir
+                detailsWindow.Closed += async (s, e) => await RefreshRecentMangas();
 
-                // Actualiser l'affichage après fermeture
-                readerWindow.Closed += async (s, e) => await LoadMangasAsync();
+                detailsWindow.Show();
             }
             catch (Exception ex)
             {
@@ -236,7 +333,6 @@ namespace MangaReader
 
             if (favorites.Any())
             {
-                // Créer une nouvelle fenêtre ou filtrer l'affichage actuel
                 MessageBox.Show($"Vous avez {favorites.Count} manga(s) en favoris", "Favoris", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
@@ -273,7 +369,6 @@ namespace MangaReader
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            // Ouvrir la fenêtre des paramètres
             MessageBox.Show("Fenêtre des paramètres à implémenter", "Paramètres", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -289,6 +384,9 @@ namespace MangaReader
         public BitmapImage CoverImage { get; set; }
         public DateTime? LastRead { get; set; }
         public bool IsFavorite { get; set; }
+        public string Tags { get; set; }
+        public string Characters { get; set; }
+        public string Description { get; set; }
 
         public string LastReadFormatted
         {
