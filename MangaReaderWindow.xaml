@@ -1,0 +1,210 @@
+﻿<Window x:Class="MangaReader.MangaReaderWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding Title, StringFormat='Manga Reader - {0}'}" 
+        Height="900" Width="1400"
+        Background="Black" 
+        WindowState="Maximized"
+        KeyDown="Window_KeyDown">
+
+    <Window.Resources>
+        <Style x:Key="ReaderButton" TargetType="Button">
+            <Setter Property="Background" Value="#2d2d30"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#404040"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#3d3d40"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Barre d'outils -->
+        <Border Grid.Row="0" Background="#1e1e1e" BorderBrush="#404040" BorderThickness="0,0,0,1" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Bouton Retour -->
+                <Button x:Name="BackButton" 
+                        Grid.Column="0"
+                        Style="{StaticResource ReaderButton}"
+                        Click="BackButton_Click"
+                        Margin="0,0,15,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="← Retour" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Informations du manga -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock x:Name="MangaTitleText" 
+                               Text="{Binding Title}"
+                               Foreground="White" 
+                               FontSize="16" 
+                               FontWeight="SemiBold"/>
+                    <TextBlock x:Name="PageInfoText" 
+                               Text="Page 1 / 1"
+                               Foreground="#CCCCCC" 
+                               FontSize="12"/>
+                </StackPanel>
+
+                <!-- Mode de lecture -->
+                <ComboBox x:Name="ReadingModeComboBox" 
+                          Grid.Column="2"
+                          Width="150"
+                          Margin="10,0"
+                          SelectionChanged="ReadingModeComboBox_SelectionChanged">
+                    <ComboBoxItem Content="Page simple" IsSelected="True"/>
+                    <ComboBoxItem Content="Double page"/>
+                    <ComboBoxItem Content="Défilement continu"/>
+                </ComboBox>
+
+                <!-- Bouton Plein écran -->
+                <Button x:Name="FullscreenButton" 
+                        Grid.Column="3"
+                        Style="{StaticResource ReaderButton}"
+                        Click="FullscreenButton_Click"
+                        Margin="5,0">
+                    <TextBlock Text="⛶"/>
+                </Button>
+
+                <!-- Bouton Favoris -->
+                <Button x:Name="FavoriteButton" 
+                        Grid.Column="4"
+                        Style="{StaticResource ReaderButton}"
+                        Click="FavoriteButton_Click"
+                        Margin="5,0,0,0">
+                    <TextBlock x:Name="FavoriteButtonText" Text="☆"/>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Zone de lecture -->
+        <Grid Grid.Row="1" Background="Black">
+            <!-- Mode page simple -->
+            <ScrollViewer x:Name="SinglePageScrollViewer" 
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto"
+                         Visibility="Visible">
+                <Image x:Name="CurrentPageImage" 
+                       Stretch="Uniform"
+                       Cursor="Hand"
+                       MouseLeftButtonDown="PageImage_Click"/>
+            </ScrollViewer>
+
+            <!-- Mode double page -->
+            <ScrollViewer x:Name="DoublePageScrollViewer"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto"
+                          Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image x:Name="LeftPageImage" 
+                           Stretch="Uniform"
+                           MaxHeight="800"
+                           Margin="0,0,5,0"
+                           Cursor="Hand"
+                           MouseLeftButtonDown="PageImage_Click"/>
+                    <Image x:Name="RightPageImage" 
+                           Stretch="Uniform"
+                           MaxHeight="800"
+                           Margin="5,0,0,0"
+                           Cursor="Hand"
+                           MouseLeftButtonDown="PageImage_Click"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Mode défilement continu -->
+            <ScrollViewer x:Name="ContinuousScrollViewer"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto"
+                          Visibility="Collapsed">
+                <ItemsControl x:Name="AllPagesItemsControl">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding}" 
+                                   Stretch="Uniform"
+                                   MaxWidth="1000"
+                                   Margin="0,0,0,10"
+                                   HorizontalAlignment="Center"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Contrôles de navigation -->
+        <Border Grid.Row="2" Background="#1e1e1e" BorderBrush="#404040" BorderThickness="0,1,0,0" Padding="15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Navigation -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Button x:Name="FirstPageButton" 
+                            Style="{StaticResource ReaderButton}"
+                            Click="FirstPageButton_Click"
+                            Margin="0,0,5,0">
+                        <TextBlock Text="⏮"/>
+                    </Button>
+
+                    <Button x:Name="PreviousPageButton" 
+                            Style="{StaticResource ReaderButton}"
+                            Click="PreviousPageButton_Click"
+                            Margin="0,0,15,0">
+                        <TextBlock Text="◀"/>
+                    </Button>
+                </StackPanel>
+
+                <!-- Slider de navigation -->
+                <Slider x:Name="PageSlider" 
+                        Grid.Column="1"
+                        Minimum="1"
+                        Maximum="1"
+                        Value="1"
+                        TickFrequency="1"
+                        IsSnapToTickEnabled="True"
+                        ValueChanged="PageSlider_ValueChanged"
+                        VerticalAlignment="Center"
+                        Margin="20,0"/>
+
+                <!-- Navigation -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button x:Name="NextPageButton" 
+                            Style="{StaticResource ReaderButton}"
+                            Click="NextPageButton_Click"
+                            Margin="15,0,0,0">
+                        <TextBlock Text="▶"/>
+                    </Button>
+
+                    <Button x:Name="LastPageButton" 
+                            Style="{StaticResource ReaderButton}"
+                            Click="LastPageButton_Click"
+                            Margin="5,0,0,0">
+                        <TextBlock Text="⏭"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
