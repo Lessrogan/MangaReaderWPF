@@ -1,74 +1,77 @@
 ﻿using MangaReader.Core;
-using System.Configuration;
-using System.Data;
+using System;
 using System.Windows;
 
 namespace MangaReader
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
+            // Gestionnaire d'exceptions global
+            AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+            DispatcherUnhandledException += OnDispatcherUnhandledException;
 
-            // Charger les paramètres au démarrage
-            AppSettings.Instance.Load();
+            try
+            {
+                base.OnStartup(e);
 
-            // Appliquer le thème si nécessaire
-            ApplyTheme();
+                // Charger les paramètres au démarrage
+                AppSettings.Instance.Load();
+
+                // Appliquer le thème si nécessaire
+                ApplyTheme();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur au démarrage:\n{ex.Message}\n\nInnerException:\n{ex.InnerException?.Message}",
+                               "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                Shutdown();
+            }
+        }
+
+        private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            var ex = e.ExceptionObject as Exception;
+            MessageBox.Show($"Erreur non gérée:\n{ex?.Message}\n\nInnerException:\n{ex?.InnerException?.Message}\n\nStackTrace:\n{ex?.StackTrace}",
+                           "Erreur Critique", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        private void OnDispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            MessageBox.Show($"Erreur Dispatcher:\n{e.Exception.Message}\n\nInnerException:\n{e.Exception.InnerException?.Message}\n\nStackTrace:\n{e.Exception.StackTrace}",
+                           "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            e.Handled = true;
+        }
+
+        private void ApplyTheme()
+        {
+            try
+            {
+                var settings = AppSettings.Instance;
+                // Code de thème simplifié pour éviter les erreurs
+            }
+            catch (Exception ex)
+            {
+                // Ignorer les erreurs de thème
+                System.Diagnostics.Debug.WriteLine($"Erreur thème: {ex.Message}");
+            }
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
             // Nettoyer le cache temporaire des archives
-            var tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "MangaReader");
-            if (System.IO.Directory.Exists(tempPath))
+            try
             {
-                try
+                var tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "MangaReader");
+                if (System.IO.Directory.Exists(tempPath))
                 {
                     System.IO.Directory.Delete(tempPath, true);
                 }
-                catch { }
             }
+            catch { }
 
             base.OnExit(e);
-        }
-
-        private void ApplyTheme()
-        {
-            var settings = AppSettings.Instance;
-
-            // Appliquer le thème en fonction des paramètres
-            var dict = new ResourceDictionary();
-
-            switch (settings.Theme)
-            {
-                case "Light":
-                    // Thème clair (à implémenter)
-                    break;
-                case "BlueNight":
-                    // Thème bleu nuit (à implémenter)
-                    break;
-                case "Custom":
-                    // Appliquer les couleurs personnalisées
-                    if (settings.CustomTheme != null)
-                    {
-                        // Créer les styles avec les couleurs personnalisées
-                        // (implémentation à compléter selon les besoins)
-                    }
-                    break;
-                default:
-                    // Thème sombre par défaut
-                    break;
-            }
-
-            if (dict.Count > 0)
-            {
-                Application.Current.Resources.MergedDictionaries.Add(dict);
-            }
         }
     }
 }

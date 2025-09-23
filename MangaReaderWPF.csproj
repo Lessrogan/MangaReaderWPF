@@ -12,6 +12,12 @@
 		<Product>Manga Reader WPF</Product>
 		<Version>2.0.0</Version>
 		<FileVersion>2.0.0.0</FileVersion>
+
+		<!-- Optimisations anti-faux positif -->
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<Optimize>true</Optimize>
+		<TrimUnusedDependencies>true</TrimUnusedDependencies>
 	</PropertyGroup>
 
 	<!--<ItemGroup>
@@ -33,6 +39,14 @@
 
 		<!-- JSON Serialization -->
 		<PackageReference Include="System.Text.Json" Version="9.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EditorConfigFiles Remove="E:\Utils\App\MangaReaderWPF\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="E:\Utils\App\MangaReaderWPF\.editorconfig" />
 	</ItemGroup>
 
 	<!--<ItemGroup>

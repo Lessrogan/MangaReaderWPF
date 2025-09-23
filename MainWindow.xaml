@@ -37,7 +37,10 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-
+        
+        <!-- Converter pour bool vers Visibility -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        
         <!-- Template pour les mangas -->
         <DataTemplate x:Key="MangaCardTemplate">
             <Border Style="{StaticResource MangaCard}" Width="180" Height="280">
@@ -95,9 +98,6 @@
                 </Grid>
             </Border>
         </DataTemplate>
-
-        <!-- Converter pour bool vers Visibility -->
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Window.Resources>
 
     <Grid>

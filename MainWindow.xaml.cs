@@ -208,18 +208,27 @@ namespace MangaReader
         {
             try
             {
-                var isArchive = ArchiveHandler.IsArchiveFile(itemPath);
-                var mangaName = Path.GetFileNameWithoutExtension(itemPath);
+                var mangaName = Path.GetFileName(itemPath);
+                bool isArchive = File.Exists(itemPath) &&
+                                new[] { ".cbz", ".cbr", ".zip", ".rar" }.Contains(Path.GetExtension(itemPath).ToLower());
 
-                if (string.IsNullOrEmpty(mangaName))
-                    return null;
-
-                // Récupérer depuis la base de données
-                var existingManga = await database.GetMangaByPathAsync(itemPath);
+                // Essayer de récupérer depuis la DB (mais gérer l'échec)
+                MangaInfo existingManga = null;
+                try
+                {
+                    if (database != null)  // Vérifier que database existe
+                    {
+                        existingManga = await database.GetMangaByPathAsync(itemPath);
+                    }
+                }
+                catch
+                {
+                    // Ignorer les erreurs de DB
+                }
 
                 var mangaInfo = new MangaInfoViewModel
                 {
-                    Title = existingManga?.Title ?? mangaName,
+                    Title = existingManga?.Title ?? mangaName ?? "Sans titre",
                     Author = existingManga?.Author ?? "Auteur inconnu",
                     FolderPath = itemPath,
                     LastRead = existingManga?.LastRead,
@@ -229,25 +238,15 @@ namespace MangaReader
                     Description = existingManga?.Description ?? "",
                     IsArchive = isArchive,
                     Rating = existingManga?.Rating ?? 0,
-                    PageCount = existingManga?.PageCount ?? 0
+                    PageCount = existingManga?.PageCount ?? 0,
+                    CoverImage = null
                 };
-
-                if (loadImage)
-                {
-                    mangaInfo.CoverImage = await LoadCoverImageAsync(itemPath, isArchive);
-                }
-
-                // Ajouter à la base de données si nouveau
-                if (existingManga == null)
-                {
-                    await database.AddMangaAsync(mangaInfo);
-                }
 
                 return mangaInfo;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erreur création manga {itemPath}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Erreur: {ex.Message}");
                 return null;
             }
         }
@@ -549,6 +548,9 @@ namespace MangaReader
 
         private void TagFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Protection contre l'appel prématuré
+            if (allMangas == null || filteredMangas == null)
+                return;
             if (TagFilterComboBox.SelectedIndex == 0)
             {
                 currentTagFilter = null;
