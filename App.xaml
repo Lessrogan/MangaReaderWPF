@@ -1,9 +1,34 @@
-﻿<Application x:Class="MangaReaderWPF.App"
+﻿<Application x:Class="MangaReader.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:MangaReaderWPF"
+             xmlns:local="clr-namespace:MangaReader"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <!-- Styles globaux de l'application -->
+        <ResourceDictionary>
+            <!-- Style pour ScrollBar personnalisé -->
+            <Style TargetType="ScrollBar">
+                <Setter Property="Background" Value="#2d2d30"/>
+                <Setter Property="Foreground" Value="#404040"/>
+                <Setter Property="Width" Value="12"/>
+            </Style>
+
+            <!-- Style global pour ComboBox -->
+            <Style TargetType="ComboBox">
+                <Setter Property="Background" Value="#2d2d30"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderBrush" Value="#404040"/>
+                <Setter Property="Padding" Value="8,5"/>
+            </Style>
+
+            <!-- Style global pour TextBox -->
+            <Style TargetType="TextBox" x:Key="DefaultTextBox">
+                <Setter Property="Background" Value="#2d2d30"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderBrush" Value="#404040"/>
+                <Setter Property="CaretBrush" Value="White"/>
+                <Setter Property="SelectionBrush" Value="#007ACC"/>
+            </Style>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

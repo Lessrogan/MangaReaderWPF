@@ -1,0 +1,333 @@
+﻿<Window x:Class="MangaReader.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Paramètres" 
+        Height="600" Width="800"
+        Background="#1a1a1a" 
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style x:Key="SettingLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,5,0,2"/>
+        </Style>
+
+        <Style x:Key="SettingTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#2d2d30"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#404040"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <Style x:Key="SettingCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,5"/>
+        </Style>
+
+        <Style x:Key="TabButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#3d3d40"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Menu latéral -->
+        <Border Grid.Column="0" Background="#252526" BorderBrush="#404040" BorderThickness="0,0,1,0">
+            <StackPanel>
+                <TextBlock Text="Paramètres" Foreground="White" FontSize="18" FontWeight="Bold" Margin="15,20,15,20"/>
+
+                <Button x:Name="GeneralTab" Style="{StaticResource TabButton}" Click="TabButton_Click" Tag="General">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚙️" FontSize="16" Margin="0,0,10,0"/>
+                        <TextBlock Text="Général"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="AppearanceTab" Style="{StaticResource TabButton}" Click="TabButton_Click" Tag="Appearance">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🎨" FontSize="16" Margin="0,0,10,0"/>
+                        <TextBlock Text="Apparence"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="PerformanceTab" Style="{StaticResource TabButton}" Click="TabButton_Click" Tag="Performance">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚡" FontSize="16" Margin="0,0,10,0"/>
+                        <TextBlock Text="Performance"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="ImportExportTab" Style="{StaticResource TabButton}" Click="TabButton_Click" Tag="ImportExport">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📥" FontSize="16" Margin="0,0,10,0"/>
+                        <TextBlock Text="Import/Export"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- Contenu des onglets -->
+        
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Padding="30">
+            <StackPanel>
+            <!-- Onglet Général -->
+            <StackPanel x:Name="GeneralPanel" Visibility="Visible">
+                <TextBlock Text="Paramètres généraux" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+
+                <!-- Dossier des mangas -->
+                <TextBlock Text="Dossier des mangas" Style="{StaticResource SettingLabel}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="MangaFolderTextBox" Grid.Column="0" Style="{StaticResource SettingTextBox}" IsReadOnly="True"/>
+                    <Button x:Name="BrowseFolderButton" Grid.Column="1" Content="Parcourir..." 
+                            Click="BrowseFolderButton_Click_WPF"
+                            Background="#007ACC" Foreground="White" Padding="10,5" Margin="5,0,0,10"/>
+                </Grid>
+
+                <!-- Support des archives -->
+                <CheckBox x:Name="SupportArchivesCheckBox" Style="{StaticResource SettingCheckBox}">
+                    <TextBlock Text="Supporter les fichiers CBZ/CBR" Foreground="White"/>
+                </CheckBox>
+
+                <!-- Sauvegarde position lecture -->
+                <CheckBox x:Name="SaveReadingPositionCheckBox" Style="{StaticResource SettingCheckBox}">
+                    <TextBlock Text="Sauvegarder la position de lecture" Foreground="White"/>
+                </CheckBox>
+
+                <Separator Background="#404040" Margin="0,20"/>
+
+                <!-- Boutons d'action -->
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="ClearCacheButton" Content="Vider le cache" 
+                            Click="ClearCacheButton_Click"
+                            Background="#2d2d30" Foreground="White" 
+                            BorderBrush="#404040" Padding="15,8" Margin="0,0,10,0"/>
+
+                    <Button x:Name="ResetSettingsButton" Content="Réinitialiser" 
+                            Click="ResetSettingsButton_Click"
+                            Background="#2d2d30" Foreground="White" 
+                            BorderBrush="#404040" Padding="15,8"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Onglet Apparence -->
+            <StackPanel x:Name="AppearancePanel" Visibility="Collapsed">
+                <TextBlock Text="Apparence" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+
+                <!-- Thème -->
+                <TextBlock Text="Thème" Style="{StaticResource SettingLabel}"/>
+                <ComboBox x:Name="ThemeComboBox" Margin="0,0,0,15" SelectionChanged="ThemeComboBox_SelectionChanged">
+                    <ComboBoxItem Content="Sombre (défaut)"/>
+                    <ComboBoxItem Content="Clair"/>
+                    <ComboBoxItem Content="Bleu nuit"/>
+                    <ComboBoxItem Content="Personnalisé"/>
+                </ComboBox>
+
+                <!-- Couleurs personnalisées -->
+                <GroupBox x:Name="CustomColorsGroup" Header="Couleurs personnalisées" 
+                          BorderBrush="#404040" Foreground="White" Margin="0,10" Visibility="Collapsed">
+                    <Grid Margin="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Fond principal" Style="{StaticResource SettingLabel}"/>
+                        <TextBox x:Name="BackgroundColorTextBox" Grid.Row="0" Grid.Column="1" 
+                                 Style="{StaticResource SettingTextBox}" Text="#1a1a1a"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Fond secondaire" Style="{StaticResource SettingLabel}"/>
+                        <TextBox x:Name="SecondaryBackgroundTextBox" Grid.Row="1" Grid.Column="1" 
+                                 Style="{StaticResource SettingTextBox}" Text="#252526"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Couleur d'accent" Style="{StaticResource SettingLabel}"/>
+                        <TextBox x:Name="AccentColorTextBox" Grid.Row="2" Grid.Column="1" 
+                                 Style="{StaticResource SettingTextBox}" Text="#007ACC"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Texte principal" Style="{StaticResource SettingLabel}"/>
+                        <TextBox x:Name="TextColorTextBox" Grid.Row="3" Grid.Column="1" 
+                                 Style="{StaticResource SettingTextBox}" Text="#FFFFFF"/>
+
+                        <Button Grid.Row="4" Grid.ColumnSpan="2" Content="Appliquer les couleurs" 
+                                Click="ApplyCustomColors_Click"
+                                Background="#007ACC" Foreground="White" 
+                                Padding="10,8" Margin="0,10,0,0"/>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Zoom par défaut -->
+                <TextBlock Text="Niveau de zoom par défaut" Style="{StaticResource SettingLabel}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="50"/>
+                    </Grid.ColumnDefinitions>
+                    <Slider x:Name="DefaultZoomSlider" Grid.Column="0" 
+                            Minimum="0.5" Maximum="3" Value="1" 
+                            TickFrequency="0.1" IsSnapToTickEnabled="True"
+                            ValueChanged="DefaultZoomSlider_ValueChanged"/>
+                    <TextBlock x:Name="ZoomValueText" Grid.Column="1" 
+                               Text="100%" Foreground="White" 
+                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Grid>
+            </StackPanel>
+
+            <!-- Onglet Performance -->
+            <StackPanel x:Name="PerformancePanel" Visibility="Collapsed">
+                <TextBlock Text="Performance" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+
+                <!-- Cache des images -->
+                <TextBlock Text="Taille du cache des images (MB)" Style="{StaticResource SettingLabel}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="50"/>
+                    </Grid.ColumnDefinitions>
+                    <Slider x:Name="ImageCacheSlider" Grid.Column="0" 
+                            Minimum="10" Maximum="500" Value="50" 
+                            TickFrequency="10" IsSnapToTickEnabled="True"
+                            ValueChanged="ImageCacheSlider_ValueChanged"/>
+                    <TextBlock x:Name="ImageCacheText" Grid.Column="1" 
+                               Text="50 MB" Foreground="White" 
+                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Grid>
+
+                <!-- Cache des miniatures -->
+                <TextBlock Text="Nombre de miniatures en cache" Style="{StaticResource SettingLabel}" Margin="0,15,0,2"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="50"/>
+                    </Grid.ColumnDefinitions>
+                    <Slider x:Name="ThumbnailCacheSlider" Grid.Column="0" 
+                            Minimum="20" Maximum="500" Value="100" 
+                            TickFrequency="10" IsSnapToTickEnabled="True"
+                            ValueChanged="ThumbnailCacheSlider_ValueChanged"/>
+                    <TextBlock x:Name="ThumbnailCacheText" Grid.Column="1" 
+                               Text="100" Foreground="White" 
+                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Grid>
+
+                <!-- Options de performance -->
+                <CheckBox x:Name="LazyLoadingCheckBox" Style="{StaticResource SettingCheckBox}" Margin="0,15,0,5">
+                    <TextBlock Text="Chargement différé des images" Foreground="White"/>
+                </CheckBox>
+
+                <CheckBox x:Name="PreloadNextPagesCheckBox" Style="{StaticResource SettingCheckBox}">
+                    <TextBlock Text="Précharger les pages suivantes" Foreground="White"/>
+                </CheckBox>
+
+                <!-- Nombre de pages à précharger -->
+                <TextBlock Text="Nombre de pages à précharger" Style="{StaticResource SettingLabel}" Margin="20,5,0,2"/>
+                <Grid Margin="20,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="50"/>
+                    </Grid.ColumnDefinitions>
+                    <Slider x:Name="PreloadCountSlider" Grid.Column="0" 
+                            Minimum="1" Maximum="10" Value="3" 
+                            TickFrequency="1" IsSnapToTickEnabled="True"
+                            ValueChanged="PreloadCountSlider_ValueChanged"
+                            IsEnabled="{Binding ElementName=PreloadNextPagesCheckBox, Path=IsChecked}"/>
+                    <TextBlock x:Name="PreloadCountText" Grid.Column="1" 
+                               Text="3" Foreground="White" 
+                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Grid>
+
+                <!-- Statistiques du cache -->
+                <Border Background="#2d2d30" BorderBrush="#404040" BorderThickness="1" 
+                        CornerRadius="4" Padding="15" Margin="0,20,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Statistiques du cache" Foreground="White" FontWeight="Bold" Margin="0,0,0,10"/>
+                        <TextBlock x:Name="CacheStatsText" Foreground="#CCCCCC" FontSize="11"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Onglet Import/Export -->
+            <StackPanel x:Name="ImportExportPanel" Visibility="Collapsed">
+                <TextBlock Text="Import/Export des métadonnées" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+
+                <!-- Export -->
+                <GroupBox Header="Exporter les métadonnées" BorderBrush="#404040" Foreground="White" Margin="0,0,0,20">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="Exporter toutes les métadonnées des mangas vers un fichier" 
+                                   Foreground="#CCCCCC" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="ExportJsonButton" Content="Exporter en JSON" 
+                                    Click="ExportJsonButton_Click"
+                                    Background="#007ACC" Foreground="White" 
+                                    Padding="15,8" Margin="0,0,10,0"/>
+
+                            <Button x:Name="ExportXmlButton" Content="Exporter en XML" 
+                                    Click="ExportXmlButton_Click"
+                                    Background="#007ACC" Foreground="White" 
+                                    Padding="15,8"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Import -->
+                <GroupBox Header="Importer les métadonnées" BorderBrush="#404040" Foreground="White">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="Importer les métadonnées depuis un fichier précédemment exporté" 
+                                   Foreground="#CCCCCC" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+                        <Button x:Name="ImportButton" Content="Importer..." 
+                                Click="ImportButton_Click"
+                                Background="#007ACC" Foreground="White" 
+                                Padding="15,8" HorizontalAlignment="Left"/>
+
+                        <TextBlock x:Name="ImportResultText" Foreground="#4CAF50" 
+                                   Margin="0,10,0,0" Visibility="Collapsed"/>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Boutons de validation -->
+        <Border Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="30">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="SaveButton" Content="Enregistrer" 
+                        Click="SaveButton_Click"
+                        Background="#007ACC" Foreground="White" 
+                        Padding="20,10" Margin="0,0,10,0"/>
+
+                <Button x:Name="CancelButton" Content="Annuler" 
+                        Click="CancelButton_Click"
+                        Background="#2d2d30" Foreground="White" 
+                        BorderBrush="#404040" Padding="20,10"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

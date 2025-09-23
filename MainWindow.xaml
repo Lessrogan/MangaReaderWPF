@@ -47,6 +47,20 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
+                    <!-- Badge favori -->
+                    <Border Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top" 
+                            Background="#FFB300" CornerRadius="0,8,0,8" Padding="5,2" Margin="0,0,0,0"
+                            Visibility="{Binding IsFavorite, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Text="⭐" FontSize="12"/>
+                    </Border>
+
+                    <!-- Badge Archive -->
+                    <Border Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" 
+                            Background="#4CAF50" CornerRadius="8,0,8,0" Padding="5,2" Margin="0,0,0,0"
+                            Visibility="{Binding IsArchive, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Text="📦" FontSize="12"/>
+                    </Border>
+
                     <!-- Image de couverture -->
                     <Border Grid.Row="0" CornerRadius="8,8,0,0" Margin="5,5,5,0">
                         <Image Source="{Binding CoverImage}" Stretch="UniformToFill"/>
@@ -58,18 +72,32 @@
                                    Foreground="White" 
                                    FontWeight="Bold" 
                                    TextTrimming="CharacterEllipsis"
-                                   FontSize="12"/>
+                                   FontSize="12"
+                                   ToolTip="{Binding Title}"/>
                         <TextBlock Text="{Binding Author}" 
                                    Foreground="#CCCCCC" 
                                    FontSize="10"
                                    TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Text="{Binding LastReadFormatted}" 
-                                   Foreground="#888888" 
-                                   FontSize="9"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding LastReadFormatted}" 
+                                       Foreground="#888888" 
+                                       FontSize="9"/>
+                            <!-- Note/Rating -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Visibility="{Binding HasRating, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <TextBlock Text="{Binding RatingStars}" Foreground="#FFD700" FontSize="9"/>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Grid>
             </Border>
         </DataTemplate>
+
+        <!-- Converter pour bool vers Visibility -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Window.Resources>
 
     <Grid>
@@ -79,80 +107,156 @@
         </Grid.ColumnDefinitions>
 
         <!-- Contenu principal -->
-        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="20">
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-                <!-- Titre principal -->
-                <TextBlock Text="📚 Manga Reader" 
-                           Foreground="White" 
-                           FontSize="28" 
-                           FontWeight="Bold"
-                           Margin="0,0,0,30"/>
+            <!-- Barre de recherche et filtres -->
+            <Border Grid.Row="0" Background="#252526" BorderBrush="#404040" BorderThickness="0,0,0,1" Padding="20,15">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <!-- Section Derniers mangas lus -->
-                <StackPanel Margin="0,0,0,40">
-                    <TextBlock Text="Derniers mangas lus" 
-                               Foreground="White" 
-                               FontSize="18" 
-                               FontWeight="SemiBold"
-                               Margin="0,0,0,15"/>
-
-                    <ItemsControl x:Name="RecentMangasList" ItemTemplate="{StaticResource MangaCardTemplate}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                    </ItemsControl>
-
-                    <!-- Message si aucun manga récent -->
-                    <TextBlock x:Name="NoRecentMangasText" 
-                               Text="Aucun manga lu récemment"
-                               Foreground="#888888"
-                               FontStyle="Italic"
-                               Visibility="Collapsed"
-                               Margin="10"/>
-                </StackPanel>
-
-                <!-- Section Tous les mangas -->
-                <StackPanel>
-                    <Grid Margin="0,0,0,15">
+                    <!-- Barre de recherche -->
+                    <Grid Grid.Column="0" Margin="0,0,15,0">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" 
-                                   Text="Tous les mangas disponibles" 
-                                   Foreground="White" 
-                                   FontSize="18" 
-                                   FontWeight="SemiBold"/>
-
-                        <TextBlock x:Name="MangaCountText" 
-                                   Grid.Column="1"
-                                   Foreground="#CCCCCC" 
-                                   FontSize="14"
-                                   VerticalAlignment="Bottom"/>
+                        <TextBlock Grid.Column="0" Text="🔍" Foreground="#CCCCCC" FontSize="16" VerticalAlignment="Center" Margin="10,0"/>
+                        <TextBox Grid.Column="1" x:Name="SearchTextBox" 
+                                 Background="#1a1a1a" Foreground="White" BorderBrush="#404040"
+                                 VerticalContentAlignment="Center" Padding="5"
+                                 FontSize="14" 
+                                 Tag="Rechercher un manga..."
+                                 GotFocus="SearchTextBox_GotFocus"
+                                 LostFocus="SearchTextBox_LostFocus"
+                                 TextChanged="SearchTextBox_TextChanged"/>
+                        <Button Grid.Column="2" x:Name="ClearSearchButton" Content="✖" 
+                                Background="Transparent" BorderThickness="0"
+                                Foreground="#CCCCCC" FontSize="12" Padding="5,0"
+                                Visibility="Collapsed"
+                                Click="ClearSearchButton_Click"/>
                     </Grid>
 
-                    <ItemsControl x:Name="AllMangasList" ItemTemplate="{StaticResource MangaCardTemplate}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                    </ItemsControl>
+                    <!-- Filtre par tags -->
+                    <ComboBox Grid.Column="1" x:Name="TagFilterComboBox" 
+                              Width="150" Margin="0,0,10,0"
+                              SelectionChanged="TagFilterComboBox_SelectionChanged">
+                        <ComboBoxItem Content="Tous les tags" IsSelected="True"/>
+                    </ComboBox>
 
-                    <!-- Message si aucun manga -->
-                    <TextBlock x:Name="NoMangasText" 
-                               Text="Aucun manga trouvé. Vérifiez le dossier de mangas."
-                               Foreground="#888888"
-                               FontStyle="Italic"
+                    <!-- Filtre favoris -->
+                    <CheckBox Grid.Column="2" x:Name="FavoritesFilterCheckBox"
+                              VerticalAlignment="Center" Margin="0,0,10,0"
+                              Checked="FavoritesFilterCheckBox_Changed"
+                              Unchecked="FavoritesFilterCheckBox_Changed">
+                        <TextBlock Text="Favoris uniquement" Foreground="White"/>
+                    </CheckBox>
+
+                    <!-- Tri -->
+                    <ComboBox Grid.Column="3" x:Name="SortComboBox" Width="120"
+                              SelectionChanged="SortComboBox_SelectionChanged">
+                        <ComboBoxItem Content="Nom" IsSelected="True"/>
+                        <ComboBoxItem Content="Date de lecture"/>
+                        <ComboBoxItem Content="Note"/>
+                        <ComboBoxItem Content="Auteur"/>
+                    </ComboBox>
+                </Grid>
+            </Border>
+
+            <!-- Contenu scrollable -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="20">
+
+                    <!-- Titre principal -->
+                    <TextBlock Text="📚 Manga Reader" 
+                               Foreground="White" 
+                               FontSize="28" 
+                               FontWeight="Bold"
+                               Margin="0,0,0,30"/>
+
+                    <!-- Message de recherche -->
+                    <TextBlock x:Name="SearchResultText" 
+                               Foreground="#CCCCCC" 
+                               FontSize="14"
                                Visibility="Collapsed"
-                               Margin="10"/>
+                               Margin="0,0,0,15"/>
+
+                    <!-- Section Derniers mangas lus -->
+                    <StackPanel x:Name="RecentSection" Margin="0,0,0,40">
+                        <TextBlock Text="Derniers mangas lus" 
+                                   Foreground="White" 
+                                   FontSize="18" 
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,15"/>
+
+                        <ItemsControl x:Name="RecentMangasList" ItemTemplate="{StaticResource MangaCardTemplate}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+
+                        <!-- Message si aucun manga récent -->
+                        <TextBlock x:Name="NoRecentMangasText" 
+                                   Text="Aucun manga lu récemment"
+                                   Foreground="#888888"
+                                   FontStyle="Italic"
+                                   Visibility="Collapsed"
+                                   Margin="10"/>
+                    </StackPanel>
+
+                    <!-- Section Tous les mangas -->
+                    <StackPanel>
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" 
+                                       x:Name="AllMangasSectionTitle"
+                                       Text="Tous les mangas disponibles" 
+                                       Foreground="White" 
+                                       FontSize="18" 
+                                       FontWeight="SemiBold"/>
+
+                            <TextBlock x:Name="MangaCountText" 
+                                       Grid.Column="1"
+                                       Foreground="#CCCCCC" 
+                                       FontSize="14"
+                                       VerticalAlignment="Bottom"/>
+                        </Grid>
+
+                        <ItemsControl x:Name="AllMangasList" ItemTemplate="{StaticResource MangaCardTemplate}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+
+                        <!-- Message si aucun manga -->
+                        <TextBlock x:Name="NoMangasText" 
+                                   Text="Aucun manga trouvé. Vérifiez le dossier de mangas dans les paramètres."
+                                   Foreground="#888888"
+                                   FontStyle="Italic"
+                                   Visibility="Collapsed"
+                                   Margin="10"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
-        </ScrollViewer>
+            </ScrollViewer>
+        </Grid>
 
         <!-- Panneau latéral -->
         <Border Grid.Column="1" 
@@ -197,6 +301,16 @@
                     </StackPanel>
                 </Button>
 
+                <!-- Bouton Import/Export -->
+                <Button x:Name="ImportExportButton" 
+                        Style="{StaticResource SideMenuButton}"
+                        Click="ImportExportButton_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📥" FontSize="16" Margin="0,0,10,0"/>
+                        <TextBlock Text="Import/Export" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
                 <!-- Séparateur -->
                 <Separator Margin="0,20" Background="#404040"/>
 
@@ -232,6 +346,27 @@
 
                     <TextBlock x:Name="RecentCountText" 
                                Text="Lus récemment: 0"
+                               Foreground="#888888" 
+                               FontSize="11"
+                               Margin="5,2"/>
+
+                    <TextBlock x:Name="ArchivesCountText" 
+                               Text="Archives: 0"
+                               Foreground="#888888" 
+                               FontSize="11"
+                               Margin="5,2"/>
+                </StackPanel>
+
+                <!-- Info cache -->
+                <StackPanel Margin="0,20,0,0">
+                    <TextBlock Text="Cache" 
+                               Foreground="#CCCCCC" 
+                               FontSize="12" 
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,10"/>
+
+                    <TextBlock x:Name="CacheInfoText" 
+                               Text="Images: 0 MB"
                                Foreground="#888888" 
                                FontSize="11"
                                Margin="5,2"/>

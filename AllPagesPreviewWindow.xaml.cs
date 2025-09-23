@@ -175,11 +175,4 @@ namespace MangaReader
             Close();
         }
     }
-
-    // Classe pour les miniatures avec taille dynamique
-    public class PageThumbnailFull : PageThumbnail
-    {
-        public double ThumbnailSize { get; set; } = 150;
-        public double ThumbnailHeight { get; set; } = 210;
-    }
 }

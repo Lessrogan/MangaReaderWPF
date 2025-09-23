@@ -386,12 +386,4 @@ namespace MangaReader
 
         #endregion
     }
-
-    // Classe pour les miniatures de pages
-    public class PageThumbnail
-    {
-        public string PageNumber { get; set; }
-        public int PageIndex { get; set; }
-        public BitmapImage Image { get; set; }
-    }
 }
