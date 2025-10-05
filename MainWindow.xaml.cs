@@ -212,35 +212,77 @@ namespace MangaReader
                 bool isArchive = File.Exists(itemPath) &&
                                 new[] { ".cbz", ".cbr", ".zip", ".rar" }.Contains(Path.GetExtension(itemPath).ToLower());
 
-                // Essayer de récupérer depuis la DB (mais gérer l'échec)
-                MangaInfo existingManga = null;
-                try
-                {
-                    if (database != null)  // Vérifier que database existe
-                    {
-                        existingManga = await database.GetMangaByPathAsync(itemPath);
-                    }
-                }
-                catch
-                {
-                    // Ignorer les erreurs de DB
-                }
-
                 var mangaInfo = new MangaInfoViewModel
                 {
-                    Title = existingManga?.Title ?? mangaName ?? "Sans titre",
-                    Author = existingManga?.Author ?? "Auteur inconnu",
+                    Title = mangaName ?? "Sans titre",
+                    Author = "Auteur inconnu",
                     FolderPath = itemPath,
-                    LastRead = existingManga?.LastRead,
-                    IsFavorite = existingManga?.IsFavorite ?? false,
-                    Tags = existingManga?.Tags ?? "",
-                    Characters = existingManga?.Characters ?? "",
-                    Description = existingManga?.Description ?? "",
+                    LastRead = null,
+                    IsFavorite = false,
+                    Tags = "",
+                    Characters = "",
+                    Description = "",
                     IsArchive = isArchive,
-                    Rating = existingManga?.Rating ?? 0,
-                    PageCount = existingManga?.PageCount ?? 0,
+                    Rating = 0,
+                    PageCount = 0,
                     CoverImage = null
                 };
+
+                // Charger l'image si demandé
+                if (loadImage)
+                {
+                    try
+                    {
+                        string coverPath = null;
+
+                        if (!isArchive && Directory.Exists(itemPath))
+                        {
+                            // Chercher une image dans le dossier
+                            var imageExtensions = new[] { "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp", "*.webp" };
+                            string firstImage = null;
+
+                            foreach (var ext in imageExtensions)
+                            {
+                                var images = Directory.GetFiles(itemPath, ext, SearchOption.AllDirectories);
+                                if (images.Length > 0)
+                                {
+                                    firstImage = images.OrderBy(f => f).First();
+                                    break;
+                                }
+                            }
+
+                            coverPath = firstImage;
+                        }
+
+                        if (!string.IsNullOrEmpty(coverPath) && File.Exists(coverPath))
+                        {
+                            var bitmap = new BitmapImage();
+                            bitmap.BeginInit();
+                            bitmap.UriSource = new Uri(coverPath);
+                            bitmap.DecodePixelWidth = 200;  // Taille miniature
+                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                            bitmap.EndInit();
+                            bitmap.Freeze();
+
+                            mangaInfo.CoverImage = bitmap;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Erreur chargement image: {ex.Message}");
+                        // Ignorer les erreurs de chargement d'image
+                    }
+                }
+
+                // Ajouter à la base de données
+                try
+                {
+                    await database.AddMangaAsync(mangaInfo);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Erreur ajout DB: {ex.Message}");
+                }
 
                 return mangaInfo;
             }

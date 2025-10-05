@@ -192,34 +192,48 @@ namespace MangaReader
         {
             var mangas = new List<MangaInfo>();
 
-            using var connection = new SQLiteConnection(connectionString);
-            await connection.OpenAsync();
-
-            var query = @"
-                SELECT * FROM Mangas 
-                WHERE LastRead IS NOT NULL 
-                ORDER BY LastRead DESC 
-                LIMIT @count";
-
-            using var command = new SQLiteCommand(query, connection);
-            command.Parameters.AddWithValue("@count", count);
-
-            using var reader = await command.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            try
             {
-                mangas.Add(new MangaInfo
+                using var connection = new SQLiteConnection(connectionString);
+                await connection.OpenAsync();
+
+                var query = @"
+                    SELECT * FROM Mangas 
+                    WHERE LastRead IS NOT NULL 
+                    ORDER BY LastRead DESC 
+                    LIMIT @count";
+
+                using var command = new SQLiteCommand(query, connection);
+                command.Parameters.AddWithValue("@count", count);
+
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
                 {
-                    Title = reader["Title"].ToString(),
-                    Author = reader["Author"] == DBNull.Value ? "Auteur inconnu" : reader["Author"].ToString(),
-                    FolderPath = reader["FolderPath"].ToString(),
-                    LastRead = Convert.ToDateTime(reader["LastRead"]),
-                    IsFavorite = Convert.ToBoolean(reader["IsFavorite"]),
-                    Tags = reader["Tags"] == DBNull.Value ? "" : reader["Tags"].ToString(),
-                    Characters = reader["Characters"] == DBNull.Value ? "" : reader["Characters"].ToString(),
-                    Description = reader["Description"] == DBNull.Value ? "" : reader["Description"].ToString(),
-                    PageCount = reader["PageCount"] == DBNull.Value ? 0 : Convert.ToInt32(reader["PageCount"]),
-                    Rating = reader["Rating"] == DBNull.Value ? 0 : Convert.ToInt32(reader["Rating"])
-                });
+                    try
+                    {
+                        mangas.Add(new MangaInfo
+                        {
+                            Title = reader["Title"]?.ToString() ?? "Sans titre",
+                            Author = reader["Author"]?.ToString() ?? "Auteur inconnu",
+                            FolderPath = reader["FolderPath"]?.ToString() ?? "",
+                            LastRead = reader["LastRead"] == DBNull.Value ? null : Convert.ToDateTime(reader["LastRead"]),
+                            IsFavorite = reader["IsFavorite"] != DBNull.Value && Convert.ToBoolean(reader["IsFavorite"]),
+                            Tags = reader["Tags"]?.ToString() ?? "",
+                            Characters = reader["Characters"]?.ToString() ?? "",
+                            Description = reader["Description"]?.ToString() ?? "",
+                            PageCount = reader["PageCount"] != DBNull.Value ? Convert.ToInt32(reader["PageCount"]) : 0,
+                            Rating = reader["Rating"] != DBNull.Value ? Convert.ToInt32(reader["Rating"]) : 0
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Erreur lecture manga: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erreur GetRecentMangasAsync: {ex.Message}");
             }
 
             return mangas;
@@ -289,16 +303,46 @@ namespace MangaReader
             using var connection = new SQLiteConnection(connectionString);
             await connection.OpenAsync();
 
-            var query = @"
+            // D'abord vérifier si le manga existe
+            var checkQuery = "SELECT COUNT(*) FROM Mangas WHERE FolderPath = @folderPath";
+            using (var checkCommand = new SQLiteCommand(checkQuery, connection))
+            {
+                checkCommand.Parameters.AddWithValue("@folderPath", folderPath);
+                var count = Convert.ToInt32(await checkCommand.ExecuteScalarAsync());
+
+                if (count == 0)
+                {
+                    // Le manga n'existe pas, on doit le créer
+                    var insertQuery = @"
+                INSERT INTO Mangas (Title, Author, FolderPath, LastRead, IsFavorite, Tags, Characters, Description)
+                VALUES (@title, @author, @folderPath, @lastRead, 0, '', '', '')";
+
+                    using var insertCommand = new SQLiteCommand(insertQuery, connection);
+                    var mangaName = Path.GetFileName(folderPath) ?? "Sans titre";
+                    insertCommand.Parameters.AddWithValue("@title", mangaName);
+                    insertCommand.Parameters.AddWithValue("@author", "Auteur inconnu");
+                    insertCommand.Parameters.AddWithValue("@folderPath", folderPath);
+                    insertCommand.Parameters.AddWithValue("@lastRead", lastRead);
+
+                    await insertCommand.ExecuteNonQueryAsync();
+                    System.Diagnostics.Debug.WriteLine($"Manga créé dans la base : {mangaName}");
+                }
+                else
+                {
+                    // Le manga existe, on met à jour
+                    var updateQuery = @"
                 UPDATE Mangas 
                 SET LastRead = @lastRead, UpdatedDate = CURRENT_TIMESTAMP
                 WHERE FolderPath = @folderPath";
 
-            using var command = new SQLiteCommand(query, connection);
-            command.Parameters.AddWithValue("@lastRead", lastRead);
-            command.Parameters.AddWithValue("@folderPath", folderPath);
+                    using var updateCommand = new SQLiteCommand(updateQuery, connection);
+                    updateCommand.Parameters.AddWithValue("@lastRead", lastRead);
+                    updateCommand.Parameters.AddWithValue("@folderPath", folderPath);
 
-            await command.ExecuteNonQueryAsync();
+                    var rowsAffected = await updateCommand.ExecuteNonQueryAsync();
+                    System.Diagnostics.Debug.WriteLine($"UpdateLastRead: {rowsAffected} lignes mises à jour");
+                }
+            }
 
             // Ajouter à l'historique
             await AddToHistoryAsync(folderPath, 0);
