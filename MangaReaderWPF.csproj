@@ -35,7 +35,7 @@
 		<PackageReference Include="System.Data.SQLite" Version="2.0.2" />
 
 		<!-- Archives support (CBZ/CBR) -->
-		<PackageReference Include="SharpCompress" Version="0.37.2" />
+		<PackageReference Include="SharpCompress" Version="0.40.0" />
 
 		<!-- JSON Serialization -->
 		<PackageReference Include="System.Text.Json" Version="9.0.0" />

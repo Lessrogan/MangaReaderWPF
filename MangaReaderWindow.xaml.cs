@@ -52,14 +52,48 @@ namespace MangaReader
             {
                 var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
 
-                imageFiles = Directory.GetFiles(mangaInfo.FolderPath, "*.*", SearchOption.AllDirectories)
-                    .Where(file => imageExtensions.Contains(Path.GetExtension(file).ToLower()))
-                    .OrderBy(f => f, new NaturalStringComparer())
-                    .ToList();
+                // Vérifier si c'est une archive
+                bool isArchive = File.Exists(mangaInfo.FolderPath) &&
+                                new[] { ".cbz", ".cbr", ".zip", ".rar" }.Contains(
+                                    Path.GetExtension(mangaInfo.FolderPath).ToLower());
+
+                if (isArchive)
+                {
+                    // Extraire l'archive de manière synchrone pour le moment
+                    var tempPath = Path.Combine(Path.GetTempPath(), "MangaReader",
+                                               Path.GetFileNameWithoutExtension(mangaInfo.FolderPath));
+
+                    if (Directory.Exists(tempPath))
+                    {
+                        imageFiles = Directory.GetFiles(tempPath, "*.*", SearchOption.AllDirectories)
+                            .Where(file => imageExtensions.Contains(Path.GetExtension(file).ToLower()))
+                            .OrderBy(f => f, new NaturalStringComparer())
+                            .ToList();
+                    }
+                    else
+                    {
+                        // Il faudrait extraire d'abord
+                        ExtractArchiveSync(mangaInfo.FolderPath, tempPath);
+
+                        imageFiles = Directory.GetFiles(tempPath, "*.*", SearchOption.AllDirectories)
+                            .Where(file => imageExtensions.Contains(Path.GetExtension(file).ToLower()))
+                            .OrderBy(f => f, new NaturalStringComparer())
+                            .ToList();
+                    }
+                }
+                else
+                {
+                    // Dossier normal
+                    imageFiles = Directory.GetFiles(mangaInfo.FolderPath, "*.*", SearchOption.AllDirectories)
+                        .Where(file => imageExtensions.Contains(Path.GetExtension(file).ToLower()))
+                        .OrderBy(f => f, new NaturalStringComparer())
+                        .ToList();
+                }
 
                 if (!imageFiles.Any())
                 {
-                    MessageBox.Show("Aucune image trouvée dans ce manga.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Aucune image trouvée dans ce manga.",
+                                  "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
                     Close();
                     return;
                 }
@@ -78,6 +112,17 @@ namespace MangaReader
             {
                 MessageBox.Show($"Erreur lors du chargement des pages : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
+            }
+        }
+
+        private void ExtractArchiveSync(string archivePath, string outputPath)
+        {
+            Directory.CreateDirectory(outputPath);
+
+            var extension = Path.GetExtension(archivePath).ToLower();
+            if (extension == ".cbz" || extension == ".zip")
+            {
+                System.IO.Compression.ZipFile.ExtractToDirectory(archivePath, outputPath, true);
             }
         }
 

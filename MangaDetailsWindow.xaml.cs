@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -48,42 +49,40 @@ namespace MangaReader
         {
             try
             {
-                // Vérifier que le dossier existe
-                if (!Directory.Exists(mangaInfo.FolderPath))
+                // Vérifier si c'est une archive ou un dossier
+                bool isArchive = File.Exists(mangaInfo.FolderPath) &&
+                                new[] { ".cbz", ".cbr", ".zip", ".rar" }.Contains(
+                                    Path.GetExtension(mangaInfo.FolderPath).ToLower());
+
+                if (!isArchive && !Directory.Exists(mangaInfo.FolderPath))
                 {
-                    MessageBox.Show($"Le dossier du manga n'existe pas :\n{mangaInfo.FolderPath}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Le dossier du manga n'existe pas :\n{mangaInfo.FolderPath}",
+                                  "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                // Charger la liste des images avec protection
-                var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
-
-                try
+                // Charger la liste des images
+                if (isArchive)
                 {
+                    // Pour une archive, extraire temporairement
+                    imageFiles = await ExtractArchiveImages(mangaInfo.FolderPath);
+                }
+                else
+                {
+                    // Pour un dossier normal
+                    var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
                     var allFiles = Directory.GetFiles(mangaInfo.FolderPath, "*.*", SearchOption.AllDirectories);
-                    if (allFiles == null || allFiles.Length == 0)
-                    {
-                        imageFiles = new List<string>();
-                        PageCountText.Text = "0 pages";
-                        return;
-                    }
 
                     imageFiles = allFiles
                         .Where(file => imageExtensions.Contains(Path.GetExtension(file).ToLower()))
                         .OrderBy(f => f, new NaturalStringComparer())
                         .ToList();
-
-                    // Mettre à jour le nombre de pages
-                    PageCountText.Text = $"{imageFiles.Count} pages";
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Erreur chargement images: {ex.Message}");
-                    imageFiles = new List<string>();
-                    PageCountText.Text = "Erreur de chargement";
                 }
 
-                // Calculer la taille du dossier en arrière-plan
+                // Mettre à jour le nombre de pages
+                PageCountText.Text = $"{imageFiles.Count} pages";
+
+               // Calculer la taille du dossier en arrière-plan
                 _ = Task.Run(async () =>
                 {
                     try
@@ -158,6 +157,72 @@ namespace MangaReader
                 MessageBox.Show($"Erreur lors du chargement des informations : {ex.Message}\n\nStackTrace: {ex.StackTrace}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 System.Diagnostics.Debug.WriteLine($"Erreur LoadMangaInfoAsync: {ex}");
             }
+        }
+
+        private async Task<List<string>> ExtractArchiveImages(string archivePath)
+        {
+            try
+            {
+                var tempPath = Path.Combine(Path.GetTempPath(), "MangaReader",
+                                           Path.GetFileNameWithoutExtension(archivePath));
+
+                // Si déjà extrait, utiliser le cache
+                if (Directory.Exists(tempPath))
+                {
+                    var cachedFiles = Directory.GetFiles(tempPath, "*.*", SearchOption.AllDirectories)
+                        .Where(f => new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" }.Contains(
+                            Path.GetExtension(f).ToLower()))
+                        .OrderBy(f => f, new NaturalStringComparer())
+                        .ToList();
+
+                    if (cachedFiles.Count > 0)
+                        return cachedFiles;
+                }
+
+                // Créer le dossier temporaire
+                Directory.CreateDirectory(tempPath);
+
+                // Extraire selon le type
+                var extension = Path.GetExtension(archivePath).ToLower();
+
+                if (extension == ".cbz" || extension == ".zip")
+                {
+                    using (var archive = System.IO.Compression.ZipFile.OpenRead(archivePath))
+                    {
+                        foreach (var entry in archive.Entries)
+                        {
+                            if (IsImageFile(entry.Name))
+                            {
+                                var destinationPath = Path.Combine(tempPath, entry.Name);
+                                var dir = Path.GetDirectoryName(destinationPath);
+                                if (!Directory.Exists(dir))
+                                    Directory.CreateDirectory(dir);
+
+                                entry.ExtractToFile(destinationPath, true);
+                            }
+                        }
+                    }
+                }
+                // Pour CBR/RAR, il faudrait SharpCompress
+
+                // Retourner les fichiers extraits
+                return Directory.GetFiles(tempPath, "*.*", SearchOption.AllDirectories)
+                    .Where(f => IsImageFile(f))
+                    .OrderBy(f => f, new NaturalStringComparer())
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur extraction archive : {ex.Message}",
+                              "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                return new List<string>();
+            }
+        }
+
+        private bool IsImageFile(string fileName)
+        {
+            var ext = Path.GetExtension(fileName).ToLower();
+            return new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" }.Contains(ext);
         }
 
         private async Task LoadPageThumbnailsAsync()

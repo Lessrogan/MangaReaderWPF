@@ -188,10 +188,10 @@ Consultez la section Résolution de problèmes
 - Ajouter un système de tag (stockés en base ?) que l'on pourrait facilement sélectionné et ajouter ( en créer de nouveau via un écran de configuration)
 - Ajouter un système de pagination
 - Localization des trads
-- Actualisation automatique lors d'un changement de répertoire // retirer le bouton actualiser
+- Actualisation automatique lors d'un changement de répertoire // garder le bouton actualiser si on rajoute des fichiers dans le repertoire
 - Bouton Random ne met pas de pop up et met direct la preview du manga ( qui devrait aussi afficher un bouton random si on vient depuis le randomiseur)
 - Paramètres -> faire fonctionner les options thèmes / nombre de prévisualisation (doit afficher toutes les images) + vérif import et export
-- prise en marche des cbz
+- Lecteur revenir en arrière si on clique à gauche de l'image + retirer la bande en bas
 
 Version : 2.0.0
 Dernière mise à jour : Décembre 2024
