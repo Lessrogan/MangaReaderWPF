@@ -191,7 +191,7 @@ Consultez la section Résolution de problèmes
 - Actualisation automatique lors d'un changement de répertoire // garder le bouton actualiser si on rajoute des fichiers dans le repertoire
 - Bouton Random ne met pas de pop up et met direct la preview du manga ( qui devrait aussi afficher un bouton random si on vient depuis le randomiseur)
 - Paramètres -> faire fonctionner les options thèmes / nombre de prévisualisation (doit afficher toutes les images) + vérif import et export
-- retirer la bande en bas si double page
+- Check quoi faire avec le copteur quand defilement
 - Todo verif si ça fonctionne les favoris
 
 Version : 2.0.0

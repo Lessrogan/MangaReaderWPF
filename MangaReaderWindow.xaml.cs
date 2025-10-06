@@ -92,17 +92,16 @@ namespace MangaReader
 
                 if (!imageFiles.Any())
                 {
-                    MessageBox.Show("Aucune image trouvée dans ce manga.",
-                                  "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Aucune image trouvée dans ce manga.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
                     Close();
                     return;
                 }
 
-                // Initialiser les contrôles seulement après avoir chargé les images
-                PageSlider.Maximum = imageFiles.Count;
-                PageSlider.Value = currentPageIndex + 1;
+                // Initialiser l'affichage des pages (au lieu du slider)
+                TotalPagesText.Text = imageFiles.Count.ToString();
+                CurrentPageTextBox.Text = (currentPageIndex + 1).ToString();
 
-                // Marquer comme initialisé AVANT les appels qui déclenchent des événements
+                // Marquer comme initialisé
                 isInitialized = true;
 
                 UpdatePageDisplay();
@@ -112,6 +111,72 @@ namespace MangaReader
             {
                 MessageBox.Show($"Erreur lors du chargement des pages : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
+            }
+        }
+
+        private void UpdatePageDisplay()
+        {
+            if (!isInitialized || imageFiles == null || !imageFiles.Any())
+                return;
+
+            var readingMode = ReadingModeComboBox.SelectedIndex;
+
+            // Mettre à jour le TextBox avec le numéro de page
+            CurrentPageTextBox.Text = (currentPageIndex + 1).ToString();
+            TotalPagesText.Text = imageFiles.Count.ToString();
+
+            if (readingMode == 1) // Double page
+            {
+                PageInfoText.Text = $"Pages {currentPageIndex + 1}-{Math.Min(currentPageIndex + 2, imageFiles.Count)} / {imageFiles.Count}";
+            }
+            else if (readingMode == 2) // Continu
+            {
+                PageInfoText.Text = $"{imageFiles.Count} pages";
+            }
+            else
+            {
+                PageInfoText.Text = $"Page {currentPageIndex + 1} / {imageFiles.Count}";
+            }
+        }
+
+        // Méthode pour gérer l'entrée directe du numéro de page
+        private void CurrentPageTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Accepter uniquement les chiffres
+            e.Handled = !int.TryParse(e.Text, out _);
+        }
+
+        private void CurrentPageTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                if (int.TryParse(CurrentPageTextBox.Text, out int pageNumber))
+                {
+                    // Convertir en index (base 0)
+                    int targetIndex = pageNumber - 1;
+
+                    // Vérifier les limites
+                    if (targetIndex >= 0 && targetIndex < imageFiles.Count)
+                    {
+                        currentPageIndex = targetIndex;
+                        LoadCurrentPage();
+                    }
+                    else
+                    {
+                        // Restaurer la valeur correcte
+                        CurrentPageTextBox.Text = (currentPageIndex + 1).ToString();
+                        MessageBox.Show($"Entrez un numéro entre 1 et {imageFiles.Count}",
+                                      "Page invalide", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+                else
+                {
+                    // Restaurer la valeur correcte
+                    CurrentPageTextBox.Text = (currentPageIndex + 1).ToString();
+                }
+
+                // Retirer le focus du TextBox
+                Keyboard.ClearFocus();
             }
         }
 
@@ -159,7 +224,7 @@ namespace MangaReader
                         break;
                 }
 
-                PageSlider.Value = currentPageIndex + 1;
+                //PageSlider.Value = currentPageIndex + 1;
                 UpdatePageDisplay();
             }
             catch (Exception ex)
@@ -246,28 +311,6 @@ namespace MangaReader
             AllPagesItemsControl.ItemsSource = imageSources;
         }
 
-        private void UpdatePageDisplay()
-        {
-            // Vérification de sécurité
-            if (!isInitialized || imageFiles == null || !imageFiles.Any())
-                return;
-
-            var readingMode = ReadingModeComboBox.SelectedIndex;
-
-            if (readingMode == 1) // Double page
-            {
-                PageInfoText.Text = $"Pages {currentPageIndex + 1}-{Math.Min(currentPageIndex + 2, imageFiles.Count)} / {imageFiles.Count}";
-            }
-            else if (readingMode == 2) // Continu
-            {
-                PageInfoText.Text = $"{imageFiles.Count} pages";
-            }
-            else
-            {
-                PageInfoText.Text = $"Page {currentPageIndex + 1} / {imageFiles.Count}";
-            }
-        }
-
         private void UpdateFavoriteButton()
         {
             FavoriteButtonText.Text = mangaInfo.IsFavorite ? "★" : "☆";
@@ -284,6 +327,7 @@ namespace MangaReader
             {
                 currentPageIndex -= step;
                 LoadCurrentPage();
+                UpdatePageDisplay();
             }
         }
 
@@ -296,6 +340,7 @@ namespace MangaReader
             {
                 currentPageIndex += step;
                 LoadCurrentPage();
+                UpdatePageDisplay();
             }
         }
 
@@ -303,12 +348,15 @@ namespace MangaReader
         {
             currentPageIndex = 0;
             LoadCurrentPage();
+            UpdatePageDisplay();
         }
 
         private void LastPageButton_Click(object sender, RoutedEventArgs e)
         {
             currentPageIndex = imageFiles.Count - 1;
             LoadCurrentPage();
+            UpdatePageDisplay();
+
         }
 
         private void PageSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

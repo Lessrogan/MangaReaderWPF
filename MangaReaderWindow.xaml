@@ -202,48 +202,73 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Navigation -->
+                <!-- Navigation gauche -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <Button x:Name="FirstPageButton" 
-                            Style="{StaticResource ReaderButton}"
-                            Click="FirstPageButton_Click"
-                            Margin="0,0,5,0">
+                    Style="{StaticResource ReaderButton}"
+                    Click="FirstPageButton_Click"
+                    Margin="0,0,5,0">
                         <TextBlock Text="⏮"/>
                     </Button>
 
                     <Button x:Name="PreviousPageButton" 
-                            Style="{StaticResource ReaderButton}"
-                            Click="PreviousPageButton_Click"
-                            Margin="0,0,15,0">
+                    Style="{StaticResource ReaderButton}"
+                    Click="PreviousPageButton_Click"
+                    Margin="0,0,15,0">
                         <TextBlock Text="◀"/>
                     </Button>
                 </StackPanel>
 
-                <!-- Slider de navigation -->
-                <Slider x:Name="PageSlider" 
-                        Grid.Column="1"
-                        Minimum="1"
-                        Maximum="1"
-                        Value="1"
-                        TickFrequency="1"
-                        IsSnapToTickEnabled="True"
-                        ValueChanged="PageSlider_ValueChanged"
-                        VerticalAlignment="Center"
-                        Margin="20,0"/>
+                <!-- Affichage du numéro de page au centre -->
+                <Border Grid.Column="1" 
+                Background="#2d2d30" 
+                CornerRadius="4" 
+                Padding="15,8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Page " 
+                           Foreground="White" 
+                           FontSize="14"
+                           VerticalAlignment="Center"/>
+                        <TextBox x:Name="CurrentPageTextBox" 
+                         Text="1"
+                         Width="50"
+                         Background="#1a1a1a"
+                         Foreground="White"
+                         BorderBrush="#404040"
+                         BorderThickness="1"
+                         TextAlignment="Center"
+                         VerticalAlignment="Center"
+                         Margin="5,0"
+                         PreviewTextInput="CurrentPageTextBox_PreviewTextInput"
+                         KeyDown="CurrentPageTextBox_KeyDown"/>
+                        <TextBlock Text=" / " 
+                           Foreground="#CCCCCC" 
+                           FontSize="14"
+                           VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TotalPagesText" 
+                           Text="1" 
+                           Foreground="White" 
+                           FontSize="14"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
 
-                <!-- Navigation -->
+                <!-- Navigation droite -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                     <Button x:Name="NextPageButton" 
-                            Style="{StaticResource ReaderButton}"
-                            Click="NextPageButton_Click"
-                            Margin="15,0,0,0">
+                    Style="{StaticResource ReaderButton}"
+                    Click="NextPageButton_Click"
+                    Margin="15,0,0,0">
                         <TextBlock Text="▶"/>
                     </Button>
 
                     <Button x:Name="LastPageButton" 
-                            Style="{StaticResource ReaderButton}"
-                            Click="LastPageButton_Click"
-                            Margin="5,0,0,0">
+                    Style="{StaticResource ReaderButton}"
+                    Click="LastPageButton_Click"
+                    Margin="5,0,0,0">
                         <TextBlock Text="⏭"/>
                     </Button>
                 </StackPanel>
