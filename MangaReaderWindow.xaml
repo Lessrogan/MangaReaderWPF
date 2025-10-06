@@ -101,51 +101,92 @@
         <Grid Grid.Row="1" Background="Black">
             <!-- Mode page simple -->
             <ScrollViewer x:Name="SinglePageScrollViewer" 
-                          HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Auto"
-                          CanContentScroll="True"
-                          Visibility="Visible">
-                <Image x:Name="CurrentPageImage" 
-                       Stretch="Uniform"
-                       Cursor="Hand"
-                       MouseLeftButtonDown="PageImage_Click"/>
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto"
+                  CanContentScroll="True"
+                  Visibility="Visible">
+                <Grid>
+                    <!-- Image centrée -->
+                    <Image x:Name="CurrentPageImage" 
+                   Stretch="Uniform"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
+
+                    <!-- Zones de clic invisibles par-dessus l'image -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Zone gauche pour page précédente -->
+                        <Border Grid.Column="0" 
+                        Background="Transparent"
+                        Cursor="Hand"
+                        MouseLeftButtonDown="LeftZone_Click">
+                        </Border>
+
+                        <!-- Zone droite pour page suivante -->
+                        <Border Grid.Column="1" 
+                        Background="Transparent"
+                        Cursor="Hand"
+                        MouseLeftButtonDown="RightZone_Click">
+                        </Border>
+                    </Grid>
+                </Grid>
             </ScrollViewer>
 
             <!-- Mode double page -->
             <ScrollViewer x:Name="DoublePageScrollViewer"
-                          HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Auto"
-                          CanContentScroll="True"
-                          Visibility="Collapsed">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Image x:Name="LeftPageImage" 
-                           Stretch="Uniform"
-                           MaxHeight="800"
-                           Margin="0,0,5,0"
-                           Cursor="Hand"
-                           MouseLeftButtonDown="PageImage_Click"/>
-                    <Image x:Name="RightPageImage" 
-                           Stretch="Uniform"
-                           MaxHeight="800"
-                           Margin="5,0,0,0"
-                           Cursor="Hand"
-                           MouseLeftButtonDown="PageImage_Click"/>
-                </StackPanel>
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto"
+                  CanContentScroll="True"
+                  Visibility="Collapsed">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Image x:Name="LeftPageImage" 
+                       Stretch="Uniform"
+                       MaxHeight="800"
+                       Margin="0,0,5,0"/>
+                        <Image x:Name="RightPageImage" 
+                       Stretch="Uniform"
+                       MaxHeight="800"
+                       Margin="5,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Zones de clic pour double page -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" 
+                        Background="Transparent"
+                        Cursor="Hand"
+                        MouseLeftButtonDown="LeftZone_Click"/>
+
+                        <Border Grid.Column="1" 
+                        Background="Transparent"
+                        Cursor="Hand"
+                        MouseLeftButtonDown="RightZone_Click"/>
+                    </Grid>
+                </Grid>
             </ScrollViewer>
 
-            <!-- Mode défilement continu -->
+            <!-- Mode défilement continu reste inchangé -->
             <ScrollViewer x:Name="ContinuousScrollViewer"
-                          HorizontalScrollBarVisibility="Disabled"
-                          VerticalScrollBarVisibility="Auto"
-                          Visibility="Collapsed">
+                  HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto"
+                  Visibility="Collapsed">
                 <ItemsControl x:Name="AllPagesItemsControl">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Image Source="{Binding}" 
-                                   Stretch="Uniform"
-                                   MaxWidth="1000"
-                                   Margin="0,0,0,10"
-                                   HorizontalAlignment="Center"/>
+                           Stretch="Uniform"
+                           MaxWidth="1000"
+                           Margin="0,0,0,10"
+                           HorizontalAlignment="Center"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

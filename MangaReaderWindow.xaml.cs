@@ -324,10 +324,39 @@ namespace MangaReader
             }
         }
 
-        private void PageImage_Click(object sender, MouseButtonEventArgs e)
+        private void LeftZone_Click(object sender, MouseButtonEventArgs e)
         {
-            // Clic pour passer à la page suivante
+            // Clic à gauche = page précédente
+            PreviousPageButton_Click(sender, null);
+            e.Handled = true;
+        }
+
+        private void RightZone_Click(object sender, MouseButtonEventArgs e)
+        {
+            // Clic à droite = page suivante
             NextPageButton_Click(sender, null);
+            e.Handled = true;
+        }
+
+        // Optionnel : Ajouter une indication visuelle au survol
+        private void Zone_MouseEnter(object sender, MouseEventArgs e)
+        {
+            var border = sender as Border;
+            if (border != null)
+            {
+                // Créer un effet de survol subtil
+                border.Background = new System.Windows.Media.SolidColorBrush(
+                    System.Windows.Media.Color.FromArgb(20, 255, 255, 255));
+            }
+        }
+
+        private void Zone_MouseLeave(object sender, MouseEventArgs e)
+        {
+            var border = sender as Border;
+            if (border != null)
+            {
+                border.Background = System.Windows.Media.Brushes.Transparent;
+            }
         }
 
         #endregion
