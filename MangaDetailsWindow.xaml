@@ -154,6 +154,7 @@
                                  Margin="0,0,0,10"/>
 
                         <!-- Tags -->
+                        <!--
                         <TextBlock Text="Tags" Style="{StaticResource MetadataLabel}"/>
                         <TextBox x:Name="TagsTextBox" 
                                  Text="{Binding Tags}"
@@ -164,7 +165,44 @@
                                  FontSize="12"
                                  Margin="0,0,0,10"
                                  ToolTip="Séparez les tags par des virgules (ex: Action, Romance, Shonen)"/>
+                        -->
+                        <TextBlock Text="Tags" Style="{StaticResource MetadataLabel}"/>
+                        <Border Background="#2d2d30" BorderBrush="#404040" BorderThickness="1" CornerRadius="4">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="100"/>
+                                </Grid.RowDefinitions>
 
+                                <!-- Tags sélectionnés -->
+                                <ScrollViewer Grid.Row="0" MaxHeight="60" VerticalScrollBarVisibility="Auto">
+                                    <WrapPanel x:Name="SelectedTagsPanel" Margin="5">
+                                        <!-- Les tags sélectionnés seront ajoutés ici -->
+                                    </WrapPanel>
+                                </ScrollViewer>
+
+                                <!-- Liste de sélection des tags -->
+                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="5">
+                                    <ItemsControl x:Name="TagsListControl">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <CheckBox Content="{Binding}" 
+                                  Margin="5,2"
+                                  Foreground="White"
+                                  Checked="TagCheckBox_Checked"
+                                  Unchecked="TagCheckBox_Unchecked"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
+                        
                         <!-- Personnages -->
                         <TextBlock Text="Personnages" Style="{StaticResource MetadataLabel}"/>
                         <TextBox x:Name="CharactersTextBox" 

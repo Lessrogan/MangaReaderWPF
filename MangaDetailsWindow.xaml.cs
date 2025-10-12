@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace MangaReader
@@ -17,6 +18,8 @@ namespace MangaReader
         private List<string> imageFiles;
         private List<PageThumbnail> pageThumbnails;
         private MangaDatabase database;
+        private TagsManager tagsManager;
+        private List<string> selectedTags = new List<string>();
 
         public MangaDetailsWindow(MangaInfo manga)
         {
@@ -34,8 +37,11 @@ namespace MangaReader
                 database = new MangaDatabase();
                 await database.InitializeAsync();
 
+                tagsManager = TagsManager.Instance;
+
                 UpdateFavoriteButton();
                 await LoadMangaInfoAsync();
+                LoadTags();
                 await LoadPageThumbnailsAsync();
             }
             catch (Exception ex)
@@ -43,6 +49,99 @@ namespace MangaReader
                 MessageBox.Show($"Erreur lors de l'initialisation : {ex.Message}\n\nDétails: {ex.StackTrace}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 System.Diagnostics.Debug.WriteLine($"Erreur InitializeAsync: {ex}");
             }
+        }
+
+        // Méthode pour charger les tags
+        private void LoadTags()
+        {
+            // Charger les tags disponibles
+            var availableTags = tagsManager.AvailableTags;
+
+            // Créer les CheckBox pour chaque tag
+            var checkBoxes = new List<CheckBox>();
+
+            foreach (var tag in availableTags)
+            {
+                var checkBox = new CheckBox
+                {
+                    Content = tag,
+                    Margin = new Thickness(5, 2, 5, 2),
+                    Foreground = System.Windows.Media.Brushes.White
+                };
+
+                // Cocher si le manga a déjà ce tag
+                if (!string.IsNullOrEmpty(mangaInfo.Tags))
+                {
+                    var mangaTags = mangaInfo.Tags.Split(',').Select(t => t.Trim()).ToList();
+                    checkBox.IsChecked = mangaTags.Contains(tag);
+                    if (checkBox.IsChecked == true)
+                    {
+                        selectedTags.Add(tag);
+                    }
+                }
+
+                checkBox.Checked += TagCheckBox_Checked;
+                checkBox.Unchecked += TagCheckBox_Unchecked;
+
+                checkBoxes.Add(checkBox);
+            }
+
+            TagsListControl.ItemsSource = checkBoxes;
+            UpdateSelectedTagsDisplay();
+        }
+
+        private void TagCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            var checkBox = sender as CheckBox;
+            if (checkBox?.Content != null)
+            {
+                var tag = checkBox.Content.ToString();
+                if (!selectedTags.Contains(tag))
+                {
+                    selectedTags.Add(tag);
+                    UpdateSelectedTagsDisplay();
+                }
+            }
+        }
+
+        private void TagCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            var checkBox = sender as CheckBox;
+            if (checkBox?.Content != null)
+            {
+                var tag = checkBox.Content.ToString();
+                selectedTags.Remove(tag);
+                UpdateSelectedTagsDisplay();
+            }
+        }
+
+        private void UpdateSelectedTagsDisplay()
+        {
+            SelectedTagsPanel.Children.Clear();
+
+            foreach (var tag in selectedTags)
+            {
+                var tagBorder = new Border
+                {
+                    Background = new SolidColorBrush(Color.FromRgb(0, 122, 204)),
+                    CornerRadius = new CornerRadius(3),
+                    Margin = new Thickness(2),
+                    Padding = new Thickness(5, 2, 5, 2)
+                };
+
+                var tagText = new TextBlock
+                {
+                    Text = tag,
+                    Foreground = Brushes.White,
+                    FontSize = 11
+                };
+
+                tagBorder.Child = tagText;
+                SelectedTagsPanel.Children.Add(tagBorder);
+            }
+
+            // Mettre à jour la propriété Tags du manga
+            mangaInfo.Tags = string.Join(", ", selectedTags);
         }
 
         private async Task LoadMangaInfoAsync()
@@ -130,14 +229,14 @@ namespace MangaReader
                     if (dbManga != null)
                     {
                         AuthorTextBox.Text = dbManga.Author ?? "Auteur inconnu";
-                        TagsTextBox.Text = dbManga.Tags ?? "";
+                        //TagsTextBox.Text = dbManga.Tags ?? "";
                         CharactersTextBox.Text = dbManga.Characters ?? "";
                         DescriptionTextBox.Text = dbManga.Description ?? "";
                     }
                     else
                     {
                         AuthorTextBox.Text = mangaInfo.Author ?? "Auteur inconnu";
-                        TagsTextBox.Text = mangaInfo.Tags ?? "";
+                        //TagsTextBox.Text = mangaInfo.Tags ?? "";
                         CharactersTextBox.Text = mangaInfo.Characters ?? "";
                         DescriptionTextBox.Text = mangaInfo.Description ?? "";
                     }
@@ -147,7 +246,7 @@ namespace MangaReader
                     System.Diagnostics.Debug.WriteLine($"Erreur chargement métadonnées DB: {ex.Message}");
                     // Utiliser les données par défaut
                     AuthorTextBox.Text = mangaInfo.Author ?? "Auteur inconnu";
-                    TagsTextBox.Text = mangaInfo.Tags ?? "";
+                    //TagsTextBox.Text = mangaInfo.Tags ?? "";
                     CharactersTextBox.Text = mangaInfo.Characters ?? "";
                     DescriptionTextBox.Text = mangaInfo.Description ?? "";
                 }
@@ -396,7 +495,8 @@ namespace MangaReader
             {
                 // Mettre à jour les métadonnées dans la base de données
                 mangaInfo.Author = AuthorTextBox.Text.Trim();
-                mangaInfo.Tags = TagsTextBox.Text.Trim();
+                //mangaInfo.Tags = TagsTextBox.Text.Trim();
+                mangaInfo.Tags = string.Join(", ", selectedTags);
                 mangaInfo.Characters = CharactersTextBox.Text.Trim();
                 mangaInfo.Description = DescriptionTextBox.Text.Trim();
 

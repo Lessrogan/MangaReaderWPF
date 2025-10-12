@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using MessageBox = System.Windows.MessageBox;
 
 namespace MangaReader
@@ -14,15 +15,82 @@ namespace MangaReader
     {
         private AppSettings settings;
         private ImageCacheManager cacheManager;
+        private TagsManager tagsManager;
 
         public SettingsWindow()
         {
             InitializeComponent();
             settings = AppSettings.Instance;
             cacheManager = ImageCacheManager.Instance;
+            tagsManager = TagsManager.Instance;
             LoadSettings();
+            LoadTagsList();
             ShowPanel("General");
             UpdateCacheStats();
+        }
+
+        private void LoadTagsList()
+        {
+            TagsListBox.Items.Clear();
+            foreach (var tag in tagsManager.AvailableTags)
+            {
+                TagsListBox.Items.Add(tag);
+            }
+        }
+
+        private void AddTagButton_Click(object sender, RoutedEventArgs e)
+        {
+            NewTagTextBox.Text = "";
+            NewTagTextBox.Focus();
+        }
+
+        private void EditTagButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (TagsListBox.SelectedItem != null)
+            {
+                NewTagTextBox.Text = TagsListBox.SelectedItem.ToString();
+                NewTagTextBox.Focus();
+            }
+        }
+
+        private async void DeleteTagButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (TagsListBox.SelectedItem != null)
+            {
+                var tag = TagsListBox.SelectedItem.ToString();
+                var result = MessageBox.Show($"Supprimer le tag '{tag}' ?", "Confirmation",
+                                            MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    tagsManager.RemoveTag(tag);
+                    await tagsManager.SaveTagsAsync();
+                    LoadTagsList();
+                }
+            }
+        }
+
+        private async void SaveTagButton_Click(object sender, RoutedEventArgs e)
+        {
+            var newTag = NewTagTextBox.Text.Trim();
+
+            if (!string.IsNullOrEmpty(newTag))
+            {
+                if (TagsListBox.SelectedItem != null)
+                {
+                    // Modification
+                    tagsManager.UpdateTag(TagsListBox.SelectedItem.ToString(), newTag);
+                }
+                else
+                {
+                    // Ajout
+                    tagsManager.AddTag(newTag);
+                }
+
+                await tagsManager.SaveTagsAsync();
+                LoadTagsList();
+                NewTagTextBox.Text = "";
+            }
         }
 
         private void LoadSettings()
@@ -80,6 +148,7 @@ namespace MangaReader
             AppearancePanel.Visibility = Visibility.Collapsed;
             PerformancePanel.Visibility = Visibility.Collapsed;
             ImportExportPanel.Visibility = Visibility.Collapsed;
+            TagsPanel.Visibility = Visibility.Collapsed;
 
             // Afficher le panneau sélectionné
             switch (panelName)
@@ -95,6 +164,9 @@ namespace MangaReader
                     break;
                 case "ImportExport":
                     ImportExportPanel.Visibility = Visibility.Visible;
+                    break;
+                case "Tags":
+                    TagsPanel.Visibility = Visibility.Visible;
                     break;
             }
         }
