@@ -54,94 +54,185 @@ namespace MangaReader
         // Méthode pour charger les tags
         private void LoadTags()
         {
-            // Charger les tags disponibles
+            tagsManager = TagsManager.Instance;
+
+            // Charger les tags du manga
+            if (!string.IsNullOrEmpty(mangaInfo.Tags))
+            {
+                selectedTags = mangaInfo.Tags.Split(',').Select(t => t.Trim()).ToList();
+            }
+
+            // Initialiser la ComboBox
+            RefreshAvailableTagsComboBox();
+
+            // Afficher les tags
+            RefreshTagsDisplay();
+        }
+
+        private void RefreshAvailableTagsComboBox()
+        {
             var availableTags = tagsManager.AvailableTags;
 
-            // Créer les CheckBox pour chaque tag
-            var checkBoxes = new List<CheckBox>();
+            // Filtrer les tags déjà sélectionnés
+            var tagsToShow = availableTags.Where(t => !selectedTags.Contains(t)).OrderBy(t => t).ToList();
 
-            foreach (var tag in availableTags)
-            {
-                var checkBox = new CheckBox
-                {
-                    Content = tag,
-                    Margin = new Thickness(5, 2, 5, 2),
-                    Foreground = System.Windows.Media.Brushes.White
-                };
-
-                // Cocher si le manga a déjà ce tag
-                if (!string.IsNullOrEmpty(mangaInfo.Tags))
-                {
-                    var mangaTags = mangaInfo.Tags.Split(',').Select(t => t.Trim()).ToList();
-                    checkBox.IsChecked = mangaTags.Contains(tag);
-                    if (checkBox.IsChecked == true)
-                    {
-                        selectedTags.Add(tag);
-                    }
-                }
-
-                checkBox.Checked += TagCheckBox_Checked;
-                checkBox.Unchecked += TagCheckBox_Unchecked;
-
-                checkBoxes.Add(checkBox);
-            }
-
-            TagsListControl.ItemsSource = checkBoxes;
-            UpdateSelectedTagsDisplay();
+            AddTagComboBox.ItemsSource = tagsToShow;
         }
 
-        private void TagCheckBox_Checked(object sender, RoutedEventArgs e)
+        private void RefreshTagsDisplay()
         {
-            var checkBox = sender as CheckBox;
-            if (checkBox?.Content != null)
-            {
-                var tag = checkBox.Content.ToString();
-                if (!selectedTags.Contains(tag))
-                {
-                    selectedTags.Add(tag);
-                    UpdateSelectedTagsDisplay();
-                }
-            }
-        }
-
-        private void TagCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            var checkBox = sender as CheckBox;
-            if (checkBox?.Content != null)
-            {
-                var tag = checkBox.Content.ToString();
-                selectedTags.Remove(tag);
-                UpdateSelectedTagsDisplay();
-            }
-        }
-
-        private void UpdateSelectedTagsDisplay()
-        {
+            // Afficher les tags sélectionnés
             SelectedTagsPanel.Children.Clear();
 
-            foreach (var tag in selectedTags)
+            foreach (var tag in selectedTags.OrderBy(t => t))
             {
-                var tagBorder = new Border
-                {
-                    Background = new SolidColorBrush(Color.FromRgb(0, 122, 204)),
-                    CornerRadius = new CornerRadius(3),
-                    Margin = new Thickness(2),
-                    Padding = new Thickness(5, 2, 5, 2)
-                };
-
-                var tagText = new TextBlock
-                {
-                    Text = tag,
-                    Foreground = Brushes.White,
-                    FontSize = 11
-                };
-
-                tagBorder.Child = tagText;
+                var tagBorder = CreateTagBadge(tag, true);
                 SelectedTagsPanel.Children.Add(tagBorder);
             }
 
-            // Mettre à jour la propriété Tags du manga
-            mangaInfo.Tags = string.Join(", ", selectedTags);
+            // Afficher les tags disponibles
+            AvailableTagsPanel.Children.Clear();
+
+            var availableTags = tagsManager.AvailableTags.Where(t => !selectedTags.Contains(t)).OrderBy(t => t);
+
+            foreach (var tag in availableTags)
+            {
+                var tagButton = CreateTagButton(tag);
+                AvailableTagsPanel.Children.Add(tagButton);
+            }
+
+            // Mettre à jour la ComboBox
+            RefreshAvailableTagsComboBox();
+        }
+
+        private Border CreateTagBadge(string tag, bool isRemovable)
+        {
+            var container = new Border
+            {
+                Background = new SolidColorBrush(Color.FromRgb(0, 122, 204)),
+                CornerRadius = new CornerRadius(12),
+                Margin = new Thickness(3),
+                Cursor = isRemovable ? Cursors.Hand : Cursors.Arrow
+            };
+
+            var panel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(8, 4, 8, 4)
+            };
+
+            var tagText = new TextBlock
+            {
+                Text = tag,
+                Foreground = Brushes.White,
+                FontSize = 11,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            panel.Children.Add(tagText);
+
+            if (isRemovable)
+            {
+                var removeButton = new TextBlock
+                {
+                    Text = " ✕",
+                    Foreground = Brushes.White,
+                    FontSize = 10,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(5, 0, 0, 0)
+                };
+                panel.Children.Add(removeButton);
+
+                container.MouseLeftButtonDown += (s, e) =>
+                {
+                    RemoveTag(tag);
+                    e.Handled = true;
+                };
+
+                container.ToolTip = "Cliquez pour retirer ce tag";
+            }
+
+            container.Child = panel;
+            return container;
+        }
+
+        private Button CreateTagButton(string tag)
+        {
+            var button = new Button
+            {
+                Content = tag,
+                Background = new SolidColorBrush(Color.FromRgb(45, 45, 48)),
+                Foreground = Brushes.White,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(64, 64, 64)),
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(8, 4, 8, 4),
+                Margin = new Thickness(3),
+                Cursor = Cursors.Hand,
+                FontSize = 11
+            };
+
+            button.Click += (s, e) =>
+            {
+                AddTag(tag);
+            };
+
+            // Style au survol
+            button.MouseEnter += (s, e) =>
+            {
+                button.Background = new SolidColorBrush(Color.FromRgb(60, 60, 64));
+            };
+
+            button.MouseLeave += (s, e) =>
+            {
+                button.Background = new SolidColorBrush(Color.FromRgb(45, 45, 48));
+            };
+
+            return button;
+        }
+
+        private void AddTag(string tag)
+        {
+            if (!string.IsNullOrWhiteSpace(tag) && !selectedTags.Contains(tag))
+            {
+                selectedTags.Add(tag);
+                RefreshTagsDisplay();
+                UpdateMangaTags();
+            }
+        }
+
+        private void RemoveTag(string tag)
+        {
+            selectedTags.Remove(tag);
+            RefreshTagsDisplay();
+            UpdateMangaTags();
+        }
+
+        private void UpdateMangaTags()
+        {
+            mangaInfo.Tags = string.Join(", ", selectedTags.OrderBy(t => t));
+        }
+
+        private void AddTagButton_Click(object sender, RoutedEventArgs e)
+        {
+            string tagToAdd = null;
+
+            // Vérifier si un tag est sélectionné dans la ComboBox
+            if (AddTagComboBox.SelectedItem != null)
+            {
+                tagToAdd = AddTagComboBox.SelectedItem.ToString();
+            }
+            // Ou si du texte a été tapé
+            else if (!string.IsNullOrWhiteSpace(AddTagComboBox.Text) &&
+                     AddTagComboBox.Text != "Rechercher ou sélectionner un tag...")
+            {
+                tagToAdd = AddTagComboBox.Text.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(tagToAdd))
+            {
+                AddTag(tagToAdd);
+                AddTagComboBox.Text = "";
+                AddTagComboBox.SelectedItem = null;
+            }
         }
 
         private async Task LoadMangaInfoAsync()
@@ -493,20 +584,20 @@ namespace MangaReader
         {
             try
             {
-                // Mettre à jour les métadonnées dans la base de données
                 mangaInfo.Author = AuthorTextBox.Text.Trim();
-                //mangaInfo.Tags = TagsTextBox.Text.Trim();
-                mangaInfo.Tags = string.Join(", ", selectedTags);
+                mangaInfo.Tags = string.Join(", ", selectedTags.OrderBy(t => t));
                 mangaInfo.Characters = CharactersTextBox.Text.Trim();
                 mangaInfo.Description = DescriptionTextBox.Text.Trim();
 
                 await database.UpdateMangaMetadataAsync(mangaInfo);
 
-                MessageBox.Show("Métadonnées sauvegardées avec succès !", "Sauvegarde", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Métadonnées sauvegardées avec succès !", "Sauvegarde",
+                              MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors de la sauvegarde : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erreur lors de la sauvegarde : {ex.Message}", "Erreur",
+                              MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

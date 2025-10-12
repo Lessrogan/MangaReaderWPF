@@ -51,6 +51,64 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="SearchComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#1a1a1a"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#404040"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Name="ToggleButton"
+                                      Background="{TemplateBinding Background}"
+                                      BorderBrush="{TemplateBinding BorderBrush}"
+                                      BorderThickness="{TemplateBinding BorderThickness}"
+                                      IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                      ClickMode="Press"/>
+                            <ContentPresenter Name="ContentSite"
+                                          IsHitTestVisible="False"
+                                          Content="{TemplateBinding SelectionBoxItem}"
+                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                          Margin="3,3,23,3"
+                                          VerticalAlignment="Center"
+                                          HorizontalAlignment="Left"/>
+                            <TextBox x:Name="PART_EditableTextBox"
+                                 Style="{x:Null}"
+                                 Background="Transparent"
+                                 Foreground="White"
+                                 HorizontalAlignment="Left"
+                                 VerticalAlignment="Center"
+                                 Margin="3,3,23,3"
+                                 Focusable="True"
+                                 Visibility="Hidden"
+                                 IsReadOnly="{TemplateBinding IsReadOnly}"/>
+                            <Popup Name="Popup"
+                               Placement="Bottom"
+                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                               AllowsTransparency="True"
+                               Focusable="False"
+                               PopupAnimation="Slide">
+                                <Grid Name="DropDown"
+                                  SnapsToDevicePixels="True"
+                                  MinWidth="{TemplateBinding ActualWidth}"
+                                  MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border Background="#2d2d30"
+                                        BorderBrush="#404040"
+                                        BorderThickness="1"/>
+                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -154,55 +212,67 @@
                                  Margin="0,0,0,10"/>
 
                         <!-- Tags -->
-                        <!--
+                        <!-- Tags avec sélection et ajout -->
                         <TextBlock Text="Tags" Style="{StaticResource MetadataLabel}"/>
-                        <TextBox x:Name="TagsTextBox" 
-                                 Text="{Binding Tags}"
-                                 Background="#2d2d30"
-                                 Foreground="White"
-                                 BorderBrush="#404040"
-                                 Padding="8"
-                                 FontSize="12"
-                                 Margin="0,0,0,10"
-                                 ToolTip="Séparez les tags par des virgules (ex: Action, Romance, Shonen)"/>
-                        -->
-                        <TextBlock Text="Tags" Style="{StaticResource MetadataLabel}"/>
-                        <Border Background="#2d2d30" BorderBrush="#404040" BorderThickness="1" CornerRadius="4">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="100"/>
-                                </Grid.RowDefinitions>
-
+                        <Border Background="#2d2d30" BorderBrush="#404040" BorderThickness="1" CornerRadius="4" Padding="10">
+                            <StackPanel>
                                 <!-- Tags sélectionnés -->
-                                <ScrollViewer Grid.Row="0" MaxHeight="60" VerticalScrollBarVisibility="Auto">
-                                    <WrapPanel x:Name="SelectedTagsPanel" Margin="5">
-                                        <!-- Les tags sélectionnés seront ajoutés ici -->
+                                <TextBlock Text="Tags sélectionnés :" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,5"/>
+                                <ScrollViewer MaxHeight="80" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10">
+                                    <WrapPanel x:Name="SelectedTagsPanel">
+                                        <!-- Les tags seront ajoutés dynamiquement ici -->
                                     </WrapPanel>
                                 </ScrollViewer>
 
-                                <!-- Liste de sélection des tags -->
-                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="5">
-                                    <ItemsControl x:Name="TagsListControl">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
+                                <!-- Séparateur -->
+                                <Separator Background="#404040" Margin="0,5"/>
+
+                                <!-- ComboBox pour ajouter un tag -->
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <ComboBox x:Name="AddTagComboBox" 
+                      Grid.Column="0"
+                      IsEditable="True"
+                      IsTextSearchEnabled="True"
+                      StaysOpenOnEdit="True"
+                      Background="#1a1a1a"
+                      Foreground="White"
+                      BorderBrush="#404040"
+                      Text="Rechercher ou sélectionner un tag...">
+                                        <ComboBox.ItemTemplate>
                                             <DataTemplate>
-                                                <CheckBox Content="{Binding}" 
-                                  Margin="5,2"
-                                  Foreground="White"
-                                  Checked="TagCheckBox_Checked"
-                                  Unchecked="TagCheckBox_Unchecked"/>
+                                                <TextBlock Text="{Binding}" Foreground="White"/>
                                             </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+
+                                    <Button x:Name="AddTagButton" 
+                    Grid.Column="1"
+                    Content="➕ Ajouter"
+                    Background="#007ACC"
+                    Foreground="White"
+                    Padding="10,5"
+                    Margin="5,0,0,0"
+                    Click="AddTagButton_Click"/>
+                                </Grid>
+
+                                <!-- Liste des tags disponibles -->
+                                <TextBlock Text="Tags disponibles (cliquez pour ajouter) :" 
+                   Foreground="#CCCCCC" 
+                   FontSize="11" 
+                   Margin="0,15,0,5"/>
+                                <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
+                                    <WrapPanel x:Name="AvailableTagsPanel">
+                                        <!-- Les boutons de tags seront ajoutés ici -->
+                                    </WrapPanel>
                                 </ScrollViewer>
-                            </Grid>
+                            </StackPanel>
                         </Border>
-                        
+
                         <!-- Personnages -->
                         <TextBlock Text="Personnages" Style="{StaticResource MetadataLabel}"/>
                         <TextBox x:Name="CharactersTextBox" 
