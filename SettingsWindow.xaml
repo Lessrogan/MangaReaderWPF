@@ -81,6 +81,13 @@
                         <TextBlock Text="Import/Export"/>
                     </StackPanel>
                 </Button>
+
+                <Button x:Name="TagsTab" Style="{StaticResource TabButton}" Click="TabButton_Click" Tag="Tags">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🏷️" FontSize="16" Margin="0,0,10,0"/>
+                        <TextBlock Text="Gestion des tags"/>
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </Border>
 
@@ -200,7 +207,58 @@
                 </Grid>
             </StackPanel>
 
-            <!-- Onglet Performance -->
+            <!-- Onglet Tags -->
+            <StackPanel x:Name="TagsPanel" Visibility="Collapsed">
+                <TextBlock Text="Gestion des tags" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Liste des tags -->
+                    <ListBox x:Name="TagsListBox" 
+                Grid.Column="0"
+                Height="300"
+                Background="#2d2d30"
+                Foreground="White"
+                BorderBrush="#404040"/>
+
+                    <!-- Boutons d'action -->
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <Button x:Name="AddTagButton" Content="Ajouter" 
+                Click="AddTagButton_Click"
+                Width="100" Margin="0,0,0,5"/>
+                        <Button x:Name="EditTagButton" Content="Modifier" 
+                Click="EditTagButton_Click"
+                Width="100" Margin="0,0,0,5"/>
+                        <Button x:Name="DeleteTagButton" Content="Supprimer" 
+                Click="DeleteTagButton_Click"
+                Width="100"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Zone d'ajout/modification -->
+                <StackPanel Margin="0,20,0,0">
+                    <TextBlock Text="Nouveau tag :" Foreground="White" Margin="0,0,0,5"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="NewTagTextBox" Grid.Column="0" 
+                    Background="#2d2d30" Foreground="White" 
+                    BorderBrush="#404040" Padding="5"/>
+                        <Button x:Name="SaveTagButton" Grid.Column="1" 
+                Content="Enregistrer" 
+                Click="SaveTagButton_Click"
+                Margin="5,0,0,0" Padding="10,5"/>
+                    </Grid>
+                </StackPanel>
+            </StackPanel>
+
+                <!-- Onglet Performance -->
             <StackPanel x:Name="PerformancePanel" Visibility="Collapsed">
                 <TextBlock Text="Performance" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
 

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace MangaReader
@@ -17,6 +18,8 @@ namespace MangaReader
         private List<string> imageFiles;
         private List<PageThumbnail> pageThumbnails;
         private MangaDatabase database;
+        private TagsManager tagsManager;
+        private List<string> selectedTags = new List<string>();
 
         public MangaDetailsWindow(MangaInfo manga)
         {
@@ -34,14 +37,225 @@ namespace MangaReader
                 database = new MangaDatabase();
                 await database.InitializeAsync();
 
+                tagsManager = TagsManager.Instance;
+
                 UpdateFavoriteButton();
                 await LoadMangaInfoAsync();
+                LoadTags();
                 await LoadPageThumbnailsAsync();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Erreur lors de l'initialisation : {ex.Message}\n\nDétails: {ex.StackTrace}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 System.Diagnostics.Debug.WriteLine($"Erreur InitializeAsync: {ex}");
+            }
+        }
+
+        // Méthode pour charger les tags
+        private void LoadTags()
+        {
+            tagsManager = TagsManager.Instance;
+
+            // Charger les tags du manga
+            if (!string.IsNullOrEmpty(mangaInfo.Tags))
+            {
+                selectedTags = mangaInfo.Tags.Split(',').Select(t => t.Trim()).ToList();
+            }
+
+            // Initialiser la ComboBox avec tous les tags disponibles
+            RefreshAvailableTagsComboBox();
+
+            // Afficher les tags sélectionnés
+            RefreshSelectedTags();
+        }
+
+        private void RefreshAvailableTagsComboBox()
+        {
+            var availableTags = tagsManager.AvailableTags;
+
+            // Filtrer les tags déjà sélectionnés
+            var tagsToShow = availableTags.Where(t => !selectedTags.Contains(t)).OrderBy(t => t).ToList();
+
+            AddTagComboBox.ItemsSource = tagsToShow;
+
+            // Placeholder text
+            if (!tagsToShow.Any())
+            {
+                AddTagComboBox.Text = "Tous les tags sont sélectionnés";
+            }
+        }
+
+        private void RefreshSelectedTags()
+        {
+            SelectedTagsPanel.Children.Clear();
+
+            if (!selectedTags.Any())
+            {
+                var noTagText = new TextBlock
+                {
+                    Text = "Aucun tag sélectionné",
+                    Foreground = new SolidColorBrush(Color.FromRgb(136, 136, 136)),
+                    FontStyle = FontStyles.Italic,
+                    FontSize = 11
+                };
+                SelectedTagsPanel.Children.Add(noTagText);
+            }
+            else
+            {
+                foreach (var tag in selectedTags.OrderBy(t => t))
+                {
+                    var tagBadge = CreateTagBadge(tag);
+                    SelectedTagsPanel.Children.Add(tagBadge);
+                }
+            }
+
+            // Mettre à jour la ComboBox
+            RefreshAvailableTagsComboBox();
+        }
+
+        private Border CreateTagBadge(string tag)
+        {
+            var container = new Border
+            {
+                Background = new SolidColorBrush(Color.FromRgb(0, 122, 204)),
+                CornerRadius = new CornerRadius(12),
+                Margin = new Thickness(3),
+                Cursor = Cursors.Hand
+            };
+
+            var panel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(8, 4, 8, 4)
+            };
+
+            var tagText = new TextBlock
+            {
+                Text = tag,
+                Foreground = Brushes.White,
+                FontSize = 11,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            panel.Children.Add(tagText);
+
+            var removeButton = new TextBlock
+            {
+                Text = " ✕",
+                Foreground = Brushes.White,
+                FontSize = 10,
+                FontWeight = FontWeights.Bold,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(5, 0, 0, 0)
+            };
+            panel.Children.Add(removeButton);
+
+            container.MouseLeftButtonDown += (s, e) =>
+            {
+                RemoveTag(tag);
+                e.Handled = true;
+            };
+
+            container.ToolTip = "Cliquez pour retirer ce tag";
+
+            // Effet de survol
+            container.MouseEnter += (s, e) =>
+            {
+                container.Background = new SolidColorBrush(Color.FromRgb(0, 100, 180));
+            };
+
+            container.MouseLeave += (s, e) =>
+            {
+                container.Background = new SolidColorBrush(Color.FromRgb(0, 122, 204));
+            };
+
+            container.Child = panel;
+            return container;
+        }
+
+        /*private Button CreateTagButton(string tag)
+        {
+            var button = new Button
+            {
+                Content = tag,
+                Background = new SolidColorBrush(Color.FromRgb(45, 45, 48)),
+                Foreground = Brushes.White,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(64, 64, 64)),
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(8, 4, 8, 4),
+                Margin = new Thickness(3),
+                Cursor = Cursors.Hand,
+                FontSize = 11
+            };
+
+            button.Click += (s, e) =>
+            {
+                AddTag(tag);
+            };
+
+            // Style au survol
+            button.MouseEnter += (s, e) =>
+            {
+                button.Background = new SolidColorBrush(Color.FromRgb(60, 60, 64));
+            };
+
+            button.MouseLeave += (s, e) =>
+            {
+                button.Background = new SolidColorBrush(Color.FromRgb(45, 45, 48));
+            };
+
+            return button;
+        }*/
+        private void AddTag(string tag)
+        {
+            if (!string.IsNullOrWhiteSpace(tag) && !selectedTags.Contains(tag))
+            {
+                selectedTags.Add(tag);
+                RefreshSelectedTags();
+                UpdateMangaTags();
+            }
+        }
+
+        private void RemoveTag(string tag)
+        {
+            selectedTags.Remove(tag);
+            RefreshSelectedTags();
+            UpdateMangaTags();
+        }
+
+        private void UpdateMangaTags()
+        {
+            mangaInfo.Tags = string.Join(", ", selectedTags.OrderBy(t => t));
+        }
+
+        private void AddTagButton_Click(object sender, RoutedEventArgs e)
+        {
+            string tagToAdd = null;
+
+            // Vérifier si un tag est sélectionné dans la ComboBox
+            if (AddTagComboBox.SelectedItem != null)
+            {
+                tagToAdd = AddTagComboBox.SelectedItem.ToString();
+            }
+            // Ou si du texte a été tapé (pour créer un nouveau tag)
+            else if (!string.IsNullOrWhiteSpace(AddTagComboBox.Text))
+            {
+                tagToAdd = AddTagComboBox.Text.Trim();
+
+                // Si c'est un nouveau tag, l'ajouter à la liste globale
+                if (!tagsManager.AvailableTags.Contains(tagToAdd))
+                {
+                    tagsManager.AddTag(tagToAdd);
+                    _ = tagsManager.SaveTagsAsync();
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(tagToAdd))
+            {
+                AddTag(tagToAdd);
+
+                // Réinitialiser la ComboBox
+                AddTagComboBox.Text = "";
+                AddTagComboBox.SelectedItem = null;
             }
         }
 
@@ -130,14 +344,14 @@ namespace MangaReader
                     if (dbManga != null)
                     {
                         AuthorTextBox.Text = dbManga.Author ?? "Auteur inconnu";
-                        TagsTextBox.Text = dbManga.Tags ?? "";
+                        //TagsTextBox.Text = dbManga.Tags ?? "";
                         CharactersTextBox.Text = dbManga.Characters ?? "";
                         DescriptionTextBox.Text = dbManga.Description ?? "";
                     }
                     else
                     {
                         AuthorTextBox.Text = mangaInfo.Author ?? "Auteur inconnu";
-                        TagsTextBox.Text = mangaInfo.Tags ?? "";
+                        //TagsTextBox.Text = mangaInfo.Tags ?? "";
                         CharactersTextBox.Text = mangaInfo.Characters ?? "";
                         DescriptionTextBox.Text = mangaInfo.Description ?? "";
                     }
@@ -147,7 +361,7 @@ namespace MangaReader
                     System.Diagnostics.Debug.WriteLine($"Erreur chargement métadonnées DB: {ex.Message}");
                     // Utiliser les données par défaut
                     AuthorTextBox.Text = mangaInfo.Author ?? "Auteur inconnu";
-                    TagsTextBox.Text = mangaInfo.Tags ?? "";
+                    //TagsTextBox.Text = mangaInfo.Tags ?? "";
                     CharactersTextBox.Text = mangaInfo.Characters ?? "";
                     DescriptionTextBox.Text = mangaInfo.Description ?? "";
                 }
@@ -394,19 +608,20 @@ namespace MangaReader
         {
             try
             {
-                // Mettre à jour les métadonnées dans la base de données
                 mangaInfo.Author = AuthorTextBox.Text.Trim();
-                mangaInfo.Tags = TagsTextBox.Text.Trim();
+                mangaInfo.Tags = string.Join(", ", selectedTags.OrderBy(t => t));
                 mangaInfo.Characters = CharactersTextBox.Text.Trim();
                 mangaInfo.Description = DescriptionTextBox.Text.Trim();
 
                 await database.UpdateMangaMetadataAsync(mangaInfo);
 
-                MessageBox.Show("Métadonnées sauvegardées avec succès !", "Sauvegarde", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Métadonnées sauvegardées avec succès !", "Sauvegarde",
+                              MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors de la sauvegarde : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erreur lors de la sauvegarde : {ex.Message}", "Erreur",
+                              MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
