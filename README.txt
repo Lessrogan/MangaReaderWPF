@@ -185,14 +185,17 @@ Consultez la section Résolution de problèmes
 
 //TODO
 
-- Ajouter un système de tag (stockés en base ?) que l'on pourrait facilement sélectionné et ajouter ( en créer de nouveau via un écran de configuration)
 - Ajouter un système de pagination
 - Localization des trads
 - Actualisation automatique lors d'un changement de répertoire // garder le bouton actualiser si on rajoute des fichiers dans le repertoire
 - Bouton Random ne met pas de pop up et met direct la preview du manga ( qui devrait aussi afficher un bouton random si on vient depuis le randomiseur)
 - Paramètres -> faire fonctionner les options thèmes / nombre de prévisualisation (doit afficher toutes les images) + vérif import et export
-- Check quoi faire avec le copteur quand defilement
+- Check quoi faire avec le compteur quand defilement
 - Todo verif si ça fonctionne les favoris
+- Todo check filtre ET tri
+- fix pagination -> pas le bon nombre d'élement par page -> actualisation automatique si possible
+ |-> apres "fix" le changement de valeur du nombre de miniature par page ne fonctionne pas meme pares actualisation
+- Todo fix l'actualisation vide les recemment lu est ce bon ?
 
 Version : 2.0.0
 Dernière mise à jour : Décembre 2024

@@ -29,6 +29,16 @@ namespace MangaReader
         private string currentTagFilter = null;
         private bool showFavoritesOnly = false;
 
+        // Variables de pagination
+        private int currentPage = 1;
+        private int totalPages = 1;
+        private int itemsPerPage = 20;
+        private string currentSortBy = "Name";
+        private bool sortAscending = true;
+        private bool isInitialized = false;
+        private List<MangaInfoViewModel> sortedMangas = new List<MangaInfoViewModel>();
+
+
         public MainWindow()
         {
             InitializeComponent();
@@ -64,6 +74,17 @@ namespace MangaReader
                 SearchTextBox.Text = SearchTextBox.Tag.ToString();
                 SearchTextBox.Foreground = System.Windows.Media.Brushes.Gray;
 
+                // Charger les paramètres de pagination
+                itemsPerPage = settings.ItemsPerPage;
+                currentSortBy = settings.DefaultSortBy;
+                sortAscending = settings.SortAscending;
+
+                // Initialiser la ComboBox avec la bonne valeur
+                InitializeItemsPerPageComboBox();
+
+                // Initialiser les contrôles de tri
+                InitializeSortControls();
+
                 // Charger les tags
                 await LoadTagsAsync();
 
@@ -78,6 +99,215 @@ namespace MangaReader
                 MessageBox.Show($"Erreur lors de l'initialisation : {ex.Message}", "Erreur",
                               MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void InitializeItemsPerPageComboBox()
+        {
+            // Sélectionner la bonne option selon la valeur sauvegardée
+            foreach (ComboBoxItem item in ItemsPerPageComboBox.Items)
+            {
+                if (item.Content.ToString() == itemsPerPage.ToString())
+                {
+                    item.IsSelected = true;
+                    break;
+                }
+            }
+        }
+
+        private void InitializeSortControls()
+        {
+            // Sélectionner l'option de tri par défaut
+            switch (currentSortBy)
+            {
+                case "Name":
+                    SortByComboBox.SelectedIndex = 0;
+                    break;
+                case "DateAdded":
+                    SortByComboBox.SelectedIndex = 1;
+                    break;
+                case "LastRead":
+                    SortByComboBox.SelectedIndex = 2;
+                    break;
+                case "Author":
+                    SortByComboBox.SelectedIndex = 3;
+                    break;
+            }
+
+            // Définir l'ordre de tri
+            SortOrderButton.Content = sortAscending ? "↑" : "↓";
+            SortOrderButton.ToolTip = sortAscending ? "Ordre croissant" : "Ordre décroissant";
+        }
+
+        private IEnumerable<MangaInfoViewModel> ApplySorting(IEnumerable<MangaInfoViewModel> mangas)
+        {
+            switch (currentSortBy)
+            {
+                case "Name":
+                    return sortAscending
+                        ? mangas.OrderBy(m => m.Title)
+                        : mangas.OrderByDescending(m => m.Title);
+
+                case "DateAdded":
+                    // Vous pourriez ajouter une propriété DateAdded dans MangaInfo
+                    return sortAscending
+                        ? mangas.OrderBy(m => m.FolderPath) // Temporaire, utilisez DateAdded quand disponible
+                        : mangas.OrderByDescending(m => m.FolderPath);
+
+                case "LastRead":
+                    return sortAscending
+                        ? mangas.OrderBy(m => m.LastRead ?? DateTime.MinValue)
+                        : mangas.OrderByDescending(m => m.LastRead ?? DateTime.MinValue);
+
+                case "Author":
+                    return sortAscending
+                        ? mangas.OrderBy(m => m.Author)
+                        : mangas.OrderByDescending(m => m.Author);
+
+                default:
+                    return mangas;
+            }
+        }
+
+        private void CalculatePagination()
+        {
+            int totalItems = sortedMangas.Count;
+            totalPages = (int)Math.Ceiling((double)totalItems / itemsPerPage);
+
+            // S'assurer que la page actuelle est valide
+            if (currentPage > totalPages)
+                currentPage = Math.Max(1, totalPages);
+
+            UpdatePaginationControls();
+        }
+
+        private void DisplayCurrentPage()
+        {
+            filteredMangas.Clear();
+
+            if (sortedMangas.Any())
+            {
+                int startIndex = (currentPage - 1) * itemsPerPage;
+                var itemsToDisplay = sortedMangas.Skip(startIndex).Take(itemsPerPage).ToList();
+
+                // Debug pour vérifier
+                System.Diagnostics.Debug.WriteLine($"Page {currentPage}: Affichage de {itemsToDisplay.Count} items (début: {startIndex}, par page: {itemsPerPage})");
+
+                foreach (var manga in itemsToDisplay)
+                {
+                    filteredMangas.Add(manga);
+                }
+
+                // Charger les images pour cette page seulement
+                _ = LoadVisibleImagesAsync();
+            }
+
+            UpdatePaginationInfo();
+            UpdatePaginationControls();
+        }
+
+        private void UpdatePaginationControls()
+        {
+            // Activer/désactiver les boutons selon la page actuelle
+            FirstPageButton.IsEnabled = currentPage > 1;
+            PreviousPageButton.IsEnabled = currentPage > 1;
+            NextPageButton.IsEnabled = currentPage < totalPages;
+            LastPageButton.IsEnabled = currentPage < totalPages;
+
+            // Mettre à jour le texte de la page actuelle
+            CurrentPageText.Text = totalPages > 0 ? $"Page {currentPage} / {totalPages}" : "Page 0 / 0";
+
+            // Mettre à jour l'info d'affichage
+            UpdatePaginationInfo();
+        }
+
+        private void UpdatePaginationInfo()
+        {
+            if (sortedMangas.Any())
+            {
+                int startIndex = (currentPage - 1) * itemsPerPage + 1;
+                int endIndex = Math.Min(currentPage * itemsPerPage, sortedMangas.Count);
+
+                // Afficher par exemple "Affichage 21-40 sur 100"
+                var infoText = $"Affichage {startIndex}-{endIndex} sur {sortedMangas.Count}";
+
+                // Si des filtres sont actifs, ajouter le total non filtré
+                if (sortedMangas.Count != allMangas.Count)
+                {
+                    infoText += $" (Total: {allMangas.Count})";
+                }
+
+                PaginationInfoText.Text = infoText;
+            }
+            else
+            {
+                PaginationInfoText.Text = "Aucun manga à afficher";
+                CurrentPageText.Text = "Page 0 / 0";
+            }
+        }
+
+        // Event handlers pour la pagination
+        private void FirstPage_Click(object sender, RoutedEventArgs e)
+        {
+            currentPage = 1;
+            DisplayCurrentPage();
+        }
+
+        private void PreviousPage_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentPage > 1)
+            {
+                currentPage--;
+                DisplayCurrentPage();
+            }
+        }
+
+        private void NextPage_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentPage < totalPages)
+            {
+                currentPage++;
+                DisplayCurrentPage();
+            }
+        }
+
+        private void LastPage_Click(object sender, RoutedEventArgs e)
+        {
+            currentPage = totalPages;
+            DisplayCurrentPage();
+        }
+
+        private void SortByComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isInitialized) return;
+
+            switch (SortByComboBox.SelectedIndex)
+            {
+                case 0:
+                    currentSortBy = "Name";
+                    break;
+                case 1:
+                    currentSortBy = "DateAdded";
+                    break;
+                case 2:
+                    currentSortBy = "LastRead";
+                    break;
+                case 3:
+                    currentSortBy = "Author";
+                    break;
+            }
+
+            currentPage = 1; // Retour à la première page
+            ApplyFilters();
+        }
+
+        private void SortOrderButton_Click(object sender, RoutedEventArgs e)
+        {
+            sortAscending = !sortAscending;
+            SortOrderButton.Content = sortAscending ? "↑" : "↓";
+            SortOrderButton.ToolTip = sortAscending ? "Ordre croissant" : "Ordre décroissant";
+
+            currentPage = 1; // Retour à la première page
+            ApplyFilters();
         }
 
         private async Task LoadTagsAsync()
@@ -182,14 +412,18 @@ namespace MangaReader
                     }
                 }
 
+                isInitialized = true;
+
                 // Charger les mangas récents
                 await RefreshRecentMangas();
 
-                // Appliquer les filtres
+                // Appliquer les filtres ET la pagination
+                currentPage = 1; // Commencer à la page 1
                 ApplyFilters();
 
                 // Mettre à jour l'interface
                 UpdateUI();
+                UpdateCacheStats();
 
                 // Si lazy loading, charger les images visibles
                 if (settings.EnableLazyLoading)
@@ -355,13 +589,13 @@ namespace MangaReader
 
         private async Task LoadVisibleImagesAsync()
         {
-            // Charger les images des mangas visibles de manière asynchrone
-            foreach (var manga in filteredMangas.Take(20))
+            // Ne charger que les images des mangas actuellement affichés
+            var mangasToLoad = filteredMangas.Where(m => m.CoverImage == null).ToList();
+            System.Diagnostics.Debug.WriteLine($"Chargement de {mangasToLoad.Count} images");
+
+            foreach (var manga in mangasToLoad)
             {
-                if (manga.CoverImage == null)
-                {
-                    manga.CoverImage = await LoadCoverImageAsync(manga.FolderPath, manga.IsArchive);
-                }
+                manga.CoverImage = await LoadCoverImageAsync(manga.FolderPath, manga.IsArchive);
             }
         }
 
@@ -399,11 +633,16 @@ namespace MangaReader
 
         private void ApplyFilters()
         {
-            filteredMangas.Clear();
+            if (allMangas == null || filteredMangas == null)
+                return;
+
+            sortedMangas.Clear();
 
             var query = allMangas.AsEnumerable();
 
-            // Recherche textuelle
+            // ÉTAPE 1 : APPLIQUER LES FILTRES
+
+            // Filtre 1 : Recherche textuelle
             if (!string.IsNullOrWhiteSpace(currentSearchTerm))
             {
                 var searchLower = currentSearchTerm.ToLower();
@@ -414,41 +653,91 @@ namespace MangaReader
                     m.Description.ToLower().Contains(searchLower));
             }
 
-            // Filtre par tag
+            // Filtre 2 : Par tag
             if (!string.IsNullOrWhiteSpace(currentTagFilter))
             {
-                query = query.Where(m => m.Tags.Contains(currentTagFilter));
+                query = query.Where(m => !string.IsNullOrEmpty(m.Tags) && m.Tags.Contains(currentTagFilter));
             }
 
-            // Filtre favoris
+            // Filtre 3 : Favoris uniquement
             if (showFavoritesOnly)
             {
                 query = query.Where(m => m.IsFavorite);
             }
 
-            // Tri
-            switch (SortComboBox?.SelectedIndex ?? 0)
+            // ÉTAPE 2 : APPLIQUER LE TRI SUR LES RÉSULTATS FILTRÉS
+            query = ApplySorting(query);
+
+            // ÉTAPE 3 : STOCKER LES RÉSULTATS
+            sortedMangas = query.ToList();
+
+            // ÉTAPE 4 : CALCULER ET AFFICHER LA PAGINATION
+            CalculatePagination();
+            DisplayCurrentPage();
+
+            // Mettre à jour les textes d'information
+            UpdateInfoTexts();
+        }
+
+        private void UpdateInfoTexts()
+        {
+            int totalFiltered = sortedMangas.Count;
+            int totalMangas = allMangas.Count;
+
+            // Afficher le nombre de résultats
+            if (totalFiltered == totalMangas)
             {
-                case 0: // Nom
-                    query = query.OrderBy(m => m.Title);
-                    break;
-                case 1: // Date de lecture
-                    query = query.OrderByDescending(m => m.LastRead ?? DateTime.MinValue);
-                    break;
-                case 2: // Note
-                    query = query.OrderByDescending(m => m.Rating);
-                    break;
-                case 3: // Auteur
-                    query = query.OrderBy(m => m.Author);
-                    break;
+                // Aucun filtre actif
+                PaginationInfoText.Text = $"{totalFiltered} manga{(totalFiltered > 1 ? "s" : "")} trouvé{(totalFiltered > 1 ? "s" : "")}";
+            }
+            else
+            {
+                // Des filtres sont actifs
+                PaginationInfoText.Text = $"{totalFiltered} manga{(totalFiltered > 1 ? "s" : "")} trouvé{(totalFiltered > 1 ? "s" : "")} sur {totalMangas}";
             }
 
-            foreach (var manga in query)
-            {
-                filteredMangas.Add(manga);
-            }
+            // Construire le texte des filtres actifs
+            var activeFilters = new List<string>();
 
-            UpdateSearchResultText();
+            if (!string.IsNullOrWhiteSpace(currentSearchTerm))
+                activeFilters.Add($"recherche: \"{currentSearchTerm}\"");
+
+            if (!string.IsNullOrWhiteSpace(currentTagFilter))
+                activeFilters.Add($"tag: {currentTagFilter}");
+
+            if (showFavoritesOnly)
+                activeFilters.Add("favoris");
+
+            if (activeFilters.Any())
+            {
+                SearchResultText.Text = $"Filtres actifs : {string.Join(", ", activeFilters)}";
+                SearchResultText.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                SearchResultText.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        // Ajout de la gestion du changement de nombre d'items par page
+        private void ItemsPerPageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isInitialized) return;
+
+            var selectedItem = (ComboBoxItem)ItemsPerPageComboBox.SelectedItem;
+            if (selectedItem != null)
+            {
+                itemsPerPage = int.Parse(selectedItem.Content.ToString());
+                currentPage = 1; // Retour à la première page
+
+                // Sauvegarder la préférence
+                settings.ItemsPerPage = itemsPerPage;
+                _ = settings.SaveAsync();
+
+                // Réappliquer l'affichage
+                CalculatePagination();
+                DisplayCurrentPage();
+            }
         }
 
         private void UpdateSearchResultText()

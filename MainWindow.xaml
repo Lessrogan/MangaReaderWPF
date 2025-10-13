@@ -114,62 +114,128 @@
             </Grid.RowDefinitions>
 
             <!-- Barre de recherche et filtres -->
+            <!-- Barre de recherche, filtres et tri -->
             <Border Grid.Row="0" Background="#252526" BorderBrush="#404040" BorderThickness="0,0,0,1" Padding="20,15">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                    <!-- Barre de recherche -->
-                    <Grid Grid.Column="0" Margin="0,0,15,0">
+                    <!-- Ligne 1 : Recherche et filtres (EXISTANTS) -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Barre de recherche -->
+                        <Grid Grid.Column="0" Margin="0,0,15,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="🔍" Foreground="#CCCCCC" FontSize="16" VerticalAlignment="Center" Margin="10,0"/>
+                            <TextBox Grid.Column="1" x:Name="SearchTextBox" 
+                         Background="#1a1a1a" Foreground="White" BorderBrush="#404040"
+                         VerticalContentAlignment="Center" Padding="5"
+                         FontSize="14" 
+                         Tag="Rechercher un manga..."
+                         GotFocus="SearchTextBox_GotFocus"
+                         LostFocus="SearchTextBox_LostFocus"
+                         TextChanged="SearchTextBox_TextChanged"/>
+                            <Button Grid.Column="2" x:Name="ClearSearchButton" Content="✖" 
+                        Background="Transparent" BorderThickness="0"
+                        Foreground="#CCCCCC" FontSize="12" Padding="5,0"
+                        Visibility="Collapsed"
+                        Click="ClearSearchButton_Click"/>
+                        </Grid>
+
+                        <!-- Filtre par tags -->
+                        <ComboBox Grid.Column="1" x:Name="TagFilterComboBox" 
+                      Width="150" Margin="0,0,10,0"
+                      SelectionChanged="TagFilterComboBox_SelectionChanged">
+                            <ComboBoxItem Content="Tous les tags" IsSelected="True"/>
+                        </ComboBox>
+
+                        <!-- Filtre favoris -->
+                        <CheckBox Grid.Column="2" x:Name="FavoritesFilterCheckBox"
+                      VerticalAlignment="Center"
+                      Checked="FavoritesFilterCheckBox_Changed"
+                      Unchecked="FavoritesFilterCheckBox_Changed">
+                            <TextBlock Text="Favoris uniquement" Foreground="White"/>
+                        </CheckBox>
+                    </Grid>
+
+                    <!-- Ligne 2 : Tri et pagination (NOUVEAU) -->
+                    <Grid Grid.Row="1" Margin="0,10,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="🔍" Foreground="#CCCCCC" FontSize="16" VerticalAlignment="Center" Margin="10,0"/>
-                        <TextBox Grid.Column="1" x:Name="SearchTextBox" 
-                                 Background="#1a1a1a" Foreground="White" BorderBrush="#404040"
-                                 VerticalContentAlignment="Center" Padding="5"
-                                 FontSize="14" 
-                                 Tag="Rechercher un manga..."
-                                 GotFocus="SearchTextBox_GotFocus"
-                                 LostFocus="SearchTextBox_LostFocus"
-                                 TextChanged="SearchTextBox_TextChanged"/>
-                        <Button Grid.Column="2" x:Name="ClearSearchButton" Content="✖" 
-                                Background="Transparent" BorderThickness="0"
-                                Foreground="#CCCCCC" FontSize="12" Padding="5,0"
-                                Visibility="Collapsed"
-                                Click="ClearSearchButton_Click"/>
+                        <!-- Options de tri -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,20,0">
+                            <TextBlock Text="Trier par :" Foreground="#CCCCCC" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <ComboBox x:Name="SortByComboBox" Width="130" SelectionChanged="SortByComboBox_SelectionChanged">
+                                <ComboBoxItem Content="Nom (A-Z)"/>
+                                <ComboBoxItem Content="Date d'ajout"/>
+                                <ComboBoxItem Content="Dernière lecture"/>
+                                <ComboBoxItem Content="Auteur"/>
+                                <ComboBoxItem Content="Note"/>
+                            </ComboBox>
+                            <Button x:Name="SortOrderButton" 
+                        Content="↑" 
+                        Width="30" 
+                        FontSize="16"
+                        Background="#2d2d30"
+                        Foreground="White"
+                        BorderBrush="#404040"
+                        Margin="5,0,0,0"
+                        Click="SortOrderButton_Click"
+                        ToolTip="Ordre croissant"/>
+                        </StackPanel>
+
+                        <!-- Info de pagination au centre -->
+                        <TextBlock Grid.Column="1" 
+                       x:Name="PaginationInfoText" 
+                       Text="0 mangas trouvés" 
+                       Foreground="#CCCCCC" 
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+
+                        <!-- Nombre par page -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,20,0">
+                            <TextBlock Text="Par page :" Foreground="#CCCCCC" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <ComboBox x:Name="ItemsPerPageComboBox" Width="60" SelectionChanged="ItemsPerPageComboBox_SelectionChanged">
+                                <ComboBoxItem Content="10"/>
+                                <ComboBoxItem Content="20" IsSelected="True"/>
+                                <ComboBoxItem Content="30"/>
+                                <ComboBoxItem Content="50"/>
+                                <ComboBoxItem Content="100"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Navigation des pages -->
+                        <StackPanel Grid.Column="3" Orientation="Horizontal">
+                            <Button x:Name="FirstPageButton" Content="⏮" Width="30" Margin="2" Click="FirstPage_Click" IsEnabled="False"
+                        Background="#2d2d30" Foreground="White" BorderBrush="#404040"/>
+                            <Button x:Name="PreviousPageButton" Content="◀" Width="30" Margin="2" Click="PreviousPage_Click" IsEnabled="False"
+                        Background="#2d2d30" Foreground="White" BorderBrush="#404040"/>
+                            <Border Background="#2d2d30" BorderBrush="#404040" BorderThickness="1" CornerRadius="3" Padding="10,5" Margin="5,0">
+                                <TextBlock x:Name="CurrentPageText" Text="Page 1 / 1" Foreground="White" VerticalAlignment="Center"/>
+                            </Border>
+                            <Button x:Name="NextPageButton" Content="▶" Width="30" Margin="2" Click="NextPage_Click"
+                        Background="#2d2d30" Foreground="White" BorderBrush="#404040"/>
+                            <Button x:Name="LastPageButton" Content="⏭" Width="30" Margin="2" Click="LastPage_Click"
+                        Background="#2d2d30" Foreground="White" BorderBrush="#404040"/>
+                        </StackPanel>
                     </Grid>
-
-                    <!-- Filtre par tags -->
-                    <ComboBox Grid.Column="1" x:Name="TagFilterComboBox" 
-                              Width="150" Margin="0,0,10,0"
-                              SelectionChanged="TagFilterComboBox_SelectionChanged">
-                        <ComboBoxItem Content="Tous les tags" IsSelected="True"/>
-                    </ComboBox>
-
-                    <!-- Filtre favoris -->
-                    <CheckBox Grid.Column="2" x:Name="FavoritesFilterCheckBox"
-                              VerticalAlignment="Center" Margin="0,0,10,0"
-                              Checked="FavoritesFilterCheckBox_Changed"
-                              Unchecked="FavoritesFilterCheckBox_Changed">
-                        <TextBlock Text="Favoris uniquement" Foreground="White"/>
-                    </CheckBox>
-
-                    <!-- Tri -->
-                    <ComboBox Grid.Column="3" x:Name="SortComboBox" Width="120"
-                              SelectionChanged="SortComboBox_SelectionChanged">
-                        <ComboBoxItem Content="Nom" IsSelected="True"/>
-                        <ComboBoxItem Content="Date de lecture"/>
-                        <ComboBoxItem Content="Note"/>
-                        <ComboBoxItem Content="Auteur"/>
-                    </ComboBox>
                 </Grid>
             </Border>
 

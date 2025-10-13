@@ -25,6 +25,11 @@ namespace MangaReader.Core
         public bool PreloadNextPages { get; set; } = true;
         public int PreloadPageCount { get; set; } = 3;
 
+        // Paramètres de pagination
+        public int ItemsPerPage { get; set; } = 20;
+        public string DefaultSortBy { get; set; } = "Name"; // Name, DateAdded, LastRead, Author
+        public bool SortAscending { get; set; } = true;
+
         // Thème personnalisé
         public ThemeColors CustomTheme { get; set; } = new ThemeColors();
 
