@@ -2,7 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Manga Reader - Accueil" Height="800" Width="1200"
-        Background="#1a1a1a" WindowState="Maximized">
+        Background="{DynamicResource BackgroundColor}"
+        WindowState="Maximized">
 
     <Window.Resources>
         <!-- Styles pour les boutons -->
@@ -115,7 +116,8 @@
 
             <!-- Barre de recherche et filtres -->
             <!-- Barre de recherche, filtres et tri -->
-            <Border Grid.Row="0" Background="#252526" BorderBrush="#404040" BorderThickness="0,0,0,1" Padding="20,15">
+            <Border Grid.Row="0" Background="{DynamicResource SecondaryBackgroundColor}"
+BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="20,15">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -140,7 +142,7 @@
 
                             <TextBlock Grid.Column="0" Text="🔍" Foreground="#CCCCCC" FontSize="16" VerticalAlignment="Center" Margin="10,0"/>
                             <TextBox Grid.Column="1" x:Name="SearchTextBox" 
-                         Background="#1a1a1a" Foreground="White" BorderBrush="#404040"
+                         Background="#1a1a1a" Foreground="{DynamicResource TextPrimaryColor}" BorderBrush="#404040"
                          VerticalContentAlignment="Center" Padding="5"
                          FontSize="14" 
                          Tag="Rechercher un manga..."
@@ -156,9 +158,10 @@
 
                         <!-- Filtre par tags -->
                         <ComboBox Grid.Column="1" x:Name="TagFilterComboBox" 
-                      Width="150" Margin="0,0,10,0"
-                      SelectionChanged="TagFilterComboBox_SelectionChanged">
-                            <ComboBoxItem Content="Tous les tags" IsSelected="True"/>
+                          Width="150" Margin="0,0,10,0"
+                          Style="{StaticResource ThemedComboBox}"
+                          SelectionChanged="TagFilterComboBox_SelectionChanged">
+                            <ComboBoxItem Content="Tous les tags"/>
                         </ComboBox>
 
                         <!-- Filtre favoris -->
@@ -182,7 +185,9 @@
                         <!-- Options de tri -->
                         <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,20,0">
                             <TextBlock Text="Trier par :" Foreground="#CCCCCC" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <ComboBox x:Name="SortByComboBox" Width="130" SelectionChanged="SortByComboBox_SelectionChanged">
+                            <ComboBox x:Name="SortByComboBox" Width="130" 
+                                Style="{StaticResource ThemedComboBox}"
+                                SelectionChanged="SortByComboBox_SelectionChanged">
                                 <ComboBoxItem Content="Nom (A-Z)"/>
                                 <ComboBoxItem Content="Date d'ajout"/>
                                 <ComboBoxItem Content="Dernière lecture"/>
@@ -212,7 +217,7 @@
                         <!-- Nombre par page -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,20,0">
                             <TextBlock Text="Par page :" Foreground="#CCCCCC" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <ComboBox x:Name="ItemsPerPageComboBox" Width="60" SelectionChanged="ItemsPerPageComboBox_SelectionChanged">
+                            <ComboBox x:Name="ItemsPerPageComboBox" Width="60" Style="{StaticResource ThemedComboBox}" SelectionChanged="ItemsPerPageComboBox_SelectionChanged">
                                 <ComboBoxItem Content="10"/>
                                 <ComboBoxItem Content="20" IsSelected="True"/>
                                 <ComboBoxItem Content="30"/>
@@ -326,8 +331,8 @@
 
         <!-- Panneau latéral -->
         <Border Grid.Column="1" 
-                Background="#252526" 
-                BorderBrush="#404040" 
+                Background="{DynamicResource SecondaryBackgroundColor}"
+                BorderBrush="{DynamicResource BorderColor}"
                 BorderThickness="1,0,0,0">
 
             <StackPanel Margin="15">

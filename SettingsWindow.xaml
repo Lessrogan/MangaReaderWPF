@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Paramètres" 
         Height="600" Width="800"
-        Background="#1a1a1a" 
+        Background="{DynamicResource BackgroundColor}"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
@@ -50,9 +50,10 @@
         </Grid.ColumnDefinitions>
 
         <!-- Menu latéral -->
-        <Border Grid.Column="0" Background="#252526" BorderBrush="#404040" BorderThickness="0,0,1,0">
+        <Border Grid.Column="0" Background="{DynamicResource SecondaryBackgroundColor}"
+BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,1,0">
             <StackPanel>
-                <TextBlock Text="Paramètres" Foreground="White" FontSize="18" FontWeight="Bold" Margin="15,20,15,20"/>
+                <TextBlock Text="Paramètres" Foreground="{DynamicResource TextPrimaryColor}" FontSize="18" FontWeight="Bold" Margin="15,20,15,20"/>
 
                 <Button x:Name="GeneralTab" Style="{StaticResource TabButton}" Click="TabButton_Click" Tag="General">
                     <StackPanel Orientation="Horizontal">
@@ -97,7 +98,7 @@
             <StackPanel>
             <!-- Onglet Général -->
             <StackPanel x:Name="GeneralPanel" Visibility="Visible">
-                <TextBlock Text="Paramètres généraux" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+                    <TextBlock Text="Paramètres généraux" Foreground="{DynamicResource TextPrimaryColor}" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
 
                 <!-- Dossier des mangas -->
                 <TextBlock Text="Dossier des mangas" Style="{StaticResource SettingLabel}"/>
@@ -114,12 +115,12 @@
 
                 <!-- Support des archives -->
                 <CheckBox x:Name="SupportArchivesCheckBox" Style="{StaticResource SettingCheckBox}">
-                    <TextBlock Text="Supporter les fichiers CBZ/CBR" Foreground="White"/>
+                        <TextBlock Text="Supporter les fichiers CBZ/CBR" Foreground="{DynamicResource TextPrimaryColor}"/>
                 </CheckBox>
 
                 <!-- Sauvegarde position lecture -->
                 <CheckBox x:Name="SaveReadingPositionCheckBox" Style="{StaticResource SettingCheckBox}">
-                    <TextBlock Text="Sauvegarder la position de lecture" Foreground="White"/>
+                        <TextBlock Text="Sauvegarder la position de lecture" Foreground="{DynamicResource TextPrimaryColor}"/>
                 </CheckBox>
 
                 <Separator Background="#404040" Margin="0,20"/>
@@ -140,7 +141,7 @@
 
             <!-- Onglet Apparence -->
             <StackPanel x:Name="AppearancePanel" Visibility="Collapsed">
-                <TextBlock Text="Apparence" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+                    <TextBlock Text="Apparence" Foreground="{DynamicResource TextPrimaryColor}" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
 
                 <!-- Thème -->
                 <TextBlock Text="Thème" Style="{StaticResource SettingLabel}"/>
@@ -202,14 +203,14 @@
                             TickFrequency="0.1" IsSnapToTickEnabled="True"
                             ValueChanged="DefaultZoomSlider_ValueChanged"/>
                     <TextBlock x:Name="ZoomValueText" Grid.Column="1" 
-                               Text="100%" Foreground="White" 
+                               Text="100%" Foreground="{DynamicResource TextPrimaryColor}" 
                                VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 </Grid>
             </StackPanel>
 
             <!-- Onglet Tags -->
             <StackPanel x:Name="TagsPanel" Visibility="Collapsed">
-                <TextBlock Text="Gestion des tags" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+                    <TextBlock Text="Gestion des tags" Foreground="{DynamicResource TextPrimaryColor}" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
 
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -241,14 +242,14 @@
 
                 <!-- Zone d'ajout/modification -->
                 <StackPanel Margin="0,20,0,0">
-                    <TextBlock Text="Nouveau tag :" Foreground="White" Margin="0,0,0,5"/>
+                        <TextBlock Text="Nouveau tag :" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,5"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox x:Name="NewTagTextBox" Grid.Column="0" 
-                    Background="#2d2d30" Foreground="White" 
+                    Background="#2d2d30" Foreground="{DynamicResource TextPrimaryColor}" 
                     BorderBrush="#404040" Padding="5"/>
                         <Button x:Name="SaveTagButton" Grid.Column="1" 
                 Content="Enregistrer" 
@@ -260,7 +261,7 @@
 
                 <!-- Onglet Performance -->
             <StackPanel x:Name="PerformancePanel" Visibility="Collapsed">
-                <TextBlock Text="Performance" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+                    <TextBlock Text="Performance" Foreground="{DynamicResource TextPrimaryColor}" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
 
                 <!-- Cache des images -->
                 <TextBlock Text="Taille du cache des images (MB)" Style="{StaticResource SettingLabel}"/>
@@ -274,7 +275,7 @@
                             TickFrequency="10" IsSnapToTickEnabled="True"
                             ValueChanged="ImageCacheSlider_ValueChanged"/>
                     <TextBlock x:Name="ImageCacheText" Grid.Column="1" 
-                               Text="50 MB" Foreground="White" 
+                               Text="50 MB" Foreground="{DynamicResource TextPrimaryColor}" 
                                VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 </Grid>
 
@@ -290,17 +291,17 @@
                             TickFrequency="10" IsSnapToTickEnabled="True"
                             ValueChanged="ThumbnailCacheSlider_ValueChanged"/>
                     <TextBlock x:Name="ThumbnailCacheText" Grid.Column="1" 
-                               Text="100" Foreground="White" 
+                               Text="100" Foreground="{DynamicResource TextPrimaryColor}"
                                VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 </Grid>
 
                     <!-- Options de performance -->
                 <CheckBox x:Name="LazyLoadingCheckBox" Style="{StaticResource SettingCheckBox}" Margin="0,15,0,5">
-                    <TextBlock Text="Chargement différé des images" Foreground="White"/>
+                        <TextBlock Text="Chargement différé des images" Foreground="{DynamicResource TextPrimaryColor}"/>
                 </CheckBox>
 
                 <CheckBox x:Name="PreloadNextPagesCheckBox" Style="{StaticResource SettingCheckBox}">
-                    <TextBlock Text="Précharger les pages suivantes" Foreground="White"/>
+                        <TextBlock Text="Précharger les pages suivantes" Foreground="{DynamicResource TextPrimaryColor}"/>
                 </CheckBox>
 
                 <!-- Nombre de pages à précharger -->
@@ -316,39 +317,40 @@
                             ValueChanged="PreloadCountSlider_ValueChanged"
                             IsEnabled="{Binding ElementName=PreloadNextPagesCheckBox, Path=IsChecked}"/>
                     <TextBlock x:Name="PreloadCountText" Grid.Column="1" 
-                               Text="3" Foreground="White" 
+                               Text="3" Foreground="{DynamicResource TextPrimaryColor}"
                                VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 </Grid>
 
                 <!-- Statistiques du cache -->
-                <Border Background="#2d2d30" BorderBrush="#404040" BorderThickness="1" 
+                    <Border Background="{DynamicResource SecondaryBackgroundColor}"
+BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" 
                         CornerRadius="4" Padding="15" Margin="0,20,0,0">
                     <StackPanel>
-                        <TextBlock Text="Statistiques du cache" Foreground="White" FontWeight="Bold" Margin="0,0,0,10"/>
-                        <TextBlock x:Name="CacheStatsText" Foreground="#CCCCCC" FontSize="11"/>
+                            <TextBlock Text="Statistiques du cache" Foreground="{DynamicResource TextPrimaryColor}" FontWeight="Bold" Margin="0,0,0,10"/>
+                            <TextBlock x:Name="CacheStatsText" Foreground="{DynamicResource TextPrimaryColor}" FontSize="11"/>
                     </StackPanel>
                 </Border>
             </StackPanel>
 
             <!-- Onglet Import/Export -->
             <StackPanel x:Name="ImportExportPanel" Visibility="Collapsed">
-                <TextBlock Text="Import/Export des métadonnées" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+                    <TextBlock Text="Import/Export des métadonnées" Foreground="{DynamicResource TextPrimaryColor}" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
 
                 <!-- Export -->
-                <GroupBox Header="Exporter les métadonnées" BorderBrush="#404040" Foreground="White" Margin="0,0,0,20">
+                    <GroupBox Header="Exporter les métadonnées" BorderBrush="#404040" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,20">
                     <StackPanel Margin="10">
                         <TextBlock Text="Exporter toutes les métadonnées des mangas vers un fichier" 
-                                   Foreground="#CCCCCC" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                                   Foreground="{DynamicResource TextPrimaryColor}" TextWrapping="Wrap" Margin="0,0,0,10"/>
 
                         <StackPanel Orientation="Horizontal">
                             <Button x:Name="ExportJsonButton" Content="Exporter en JSON" 
                                     Click="ExportJsonButton_Click"
-                                    Background="#007ACC" Foreground="White" 
+                                    Background="#007ACC" Foreground="{DynamicResource TextPrimaryColor}"
                                     Padding="15,8" Margin="0,0,10,0"/>
 
                             <Button x:Name="ExportXmlButton" Content="Exporter en XML" 
                                     Click="ExportXmlButton_Click"
-                                    Background="#007ACC" Foreground="White" 
+                                    Background="#007ACC" Foreground="{DynamicResource TextPrimaryColor}"
                                     Padding="15,8"/>
                         </StackPanel>
                     </StackPanel>
@@ -358,11 +360,11 @@
                 <GroupBox Header="Importer les métadonnées" BorderBrush="#404040" Foreground="White">
                     <StackPanel Margin="10">
                         <TextBlock Text="Importer les métadonnées depuis un fichier précédemment exporté" 
-                                   Foreground="#CCCCCC" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                                   Foreground="{DynamicResource TextPrimaryColor}" TextWrapping="Wrap" Margin="0,0,0,10"/>
 
                         <Button x:Name="ImportButton" Content="Importer..." 
                                 Click="ImportButton_Click"
-                                Background="#007ACC" Foreground="White" 
+                                Background="#007ACC" Foreground="{DynamicResource TextPrimaryColor}"
                                 Padding="15,8" HorizontalAlignment="Left"/>
 
                         <TextBlock x:Name="ImportResultText" Foreground="#4CAF50" 

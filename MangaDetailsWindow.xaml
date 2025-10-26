@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="{Binding Title, StringFormat='Détails - {0}'}" 
         Height="800" Width="1200"
-        Background="#1a1a1a" 
+        Background="{DynamicResource BackgroundColor}"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
@@ -96,8 +96,8 @@
                                   SnapsToDevicePixels="True"
                                   MinWidth="{TemplateBinding ActualWidth}"
                                   MaxHeight="{TemplateBinding MaxDropDownHeight}">
-                                    <Border Background="#2d2d30"
-                                        BorderBrush="#404040"
+                                    <Border Background = "{DynamicResource SecondaryBackgroundColor}"
+BorderBrush="{DynamicResource BorderColor}"
                                         BorderThickness="1"/>
                                     <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
                                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
@@ -118,7 +118,8 @@
         </Grid.RowDefinitions>
 
         <!-- En-tête avec boutons d'action -->
-        <Border Grid.Row="0" Background="#1e1e1e" BorderBrush="#404040" BorderThickness="0,0,0,1" Padding="20">
+        <Border Grid.Row="0" Background="{DynamicResource SecondaryBackgroundColor}"
+BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="20">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -139,7 +140,7 @@
                 <!-- Titre -->
                 <TextBlock Grid.Column="1" 
                            Text="{Binding Title}"
-                           Foreground="White" 
+                           Foreground="{DynamicResource TextPrimaryColor}"
                            FontSize="20" 
                            FontWeight="Bold"
                            VerticalAlignment="Center"
@@ -187,8 +188,8 @@
 
                     <!-- Image de couverture -->
                     <Border Grid.Column="0" 
-                            Background="#2d2d30" 
-                            BorderBrush="#404040" 
+                            Background="{DynamicResource SecondaryBackgroundColor}"
+BorderBrush="{DynamicResource BorderColor}"
                             BorderThickness="1" 
                             CornerRadius="8">
                         <Image x:Name="CoverImage" 
@@ -205,7 +206,7 @@
                         <TextBox x:Name="AuthorTextBox" 
                                  Text="{Binding Author}" 
                                  Background="#2d2d30"
-                                 Foreground="White"
+Foreground="{DynamicResource TextPrimaryColor}"
                                  BorderBrush="#404040"
                                  Padding="8"
                                  FontSize="12"
@@ -213,7 +214,8 @@
 
                         <!-- Tags avec sélection et ajout -->
                         <TextBlock Text="Tags" Style="{StaticResource MetadataLabel}"/>
-                        <Border Background="#2d2d30" BorderBrush="#404040" BorderThickness="1" CornerRadius="4" Padding="10">
+                        <Border Background="{DynamicResource SecondaryBackgroundColor}"
+BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" CornerRadius="4" Padding="10">
                             <StackPanel>
                                 <!-- Tags sélectionnés -->
                                 <ScrollViewer MaxHeight="100" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10">
@@ -234,9 +236,7 @@
                                           IsEditable="True"
                                           IsTextSearchEnabled="True"
                                           StaysOpenOnEdit="True"
-                                          Background="#1a1a1a"
-                                          Foreground="White"
-                                          BorderBrush="#404040">
+                                          Style="{StaticResource ThemedComboBox}">
                                         <ComboBox.Resources>
                                             <Style TargetType="ComboBoxItem">
                                                 <Setter Property="Background" Value="#2d2d30"/>
@@ -335,7 +335,7 @@
 
                         <TextBlock Grid.Column="0" 
                                    Text="Aperçu des pages" 
-                                   Foreground="White" 
+                                   Foreground="{DynamicResource TextPrimaryColor}"
                                    FontSize="16" 
                                    FontWeight="SemiBold"/>
 
@@ -367,7 +367,7 @@
                                                 VerticalAlignment="Bottom"
                                                 Padding="5,2">
                                             <TextBlock Text="{Binding PageNumber}" 
-                                                       Foreground="White" 
+                                                       Foreground="{DynamicResource TextPrimaryColor}" 
                                                        FontSize="10"
                                                        HorizontalAlignment="Center"/>
                                         </Border>

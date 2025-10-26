@@ -189,7 +189,10 @@ Consultez la section Résolution de problèmes
 - Localization des trads
 - Actualisation automatique lors d'un changement de répertoire // garder le bouton actualiser si on rajoute des fichiers dans le repertoire
 - Bouton Random ne met pas de pop up et met direct la preview du manga ( qui devrait aussi afficher un bouton random si on vient depuis le randomiseur)
-- Paramètres -> faire fonctionner les options thèmes / nombre de prévisualisation (doit afficher toutes les images) + vérif import et export
+- Paramètres 
+	-> sauvegarder le thèmes choisit
+	-> nombre de prévisualisation (doit afficher toutes les images) 
+	-> TODO vérif import et export
 - Check quoi faire avec le compteur quand defilement
 - Todo verif si ça fonctionne les favoris
 - Todo check filtre ET tri

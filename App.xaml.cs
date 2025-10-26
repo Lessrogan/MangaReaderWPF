@@ -19,8 +19,8 @@ namespace MangaReader
                 // Charger les paramètres au démarrage
                 AppSettings.Instance.Load();
 
-                // Appliquer le thème si nécessaire
-                ApplyTheme();
+                // Appliquer le thème sauvegardé
+                ThemeManager.ApplyTheme(AppSettings.Instance.Theme);
             }
             catch (Exception ex)
             {

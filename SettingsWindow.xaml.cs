@@ -16,6 +16,7 @@ namespace MangaReader
         private AppSettings settings;
         private ImageCacheManager cacheManager;
         private TagsManager tagsManager;
+        private bool isInitialized = false;
 
         public SettingsWindow()
         {
@@ -27,6 +28,7 @@ namespace MangaReader
             LoadTagsList();
             ShowPanel("General");
             UpdateCacheStats();
+            isInitialized = true;
         }
 
         private void LoadTagsList()
@@ -212,6 +214,25 @@ namespace MangaReader
             else
             {
                 CustomColorsGroup.Visibility = Visibility.Collapsed;
+            }
+
+            // Appliquer le thème immédiatement pour prévisualisation
+            if (isInitialized) // Ajouter cette variable bool
+            {
+                string themeName = "Dark";
+                switch (ThemeComboBox.SelectedIndex)
+                {
+                    case 0: themeName = "Dark"; break;
+                    case 1: themeName = "Light"; break;
+                    case 2: themeName = "BlueNight"; break;
+                    case 3: themeName = "Custom"; break;
+                }
+
+                ThemeManager.ApplyTheme(themeName);
+
+                // Message pour indiquer que certains éléments nécessitent un redémarrage
+                MessageBox.Show("Le thème a été appliqué. Certains éléments nécessiteront un redémarrage complet de l'application.",
+                              "Thème appliqué", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
