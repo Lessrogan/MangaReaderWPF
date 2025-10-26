@@ -294,22 +294,6 @@
                                VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 </Grid>
 
-                    <!-- Nombre d'éléments par page -->
-                    <TextBlock Text="Nombre de mangas par page" Style="{StaticResource SettingLabel}" Margin="0,15,0,2"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="50"/>
-                        </Grid.ColumnDefinitions>
-                        <Slider x:Name="ItemsPerPageSlider" Grid.Column="0" 
-                            Minimum="10" Maximum="100" Value="20" 
-                            TickFrequency="10" IsSnapToTickEnabled="True"
-                            ValueChanged="ItemsPerPageSlider_ValueChanged"/>
-                        <TextBlock x:Name="ItemsPerPageText" Grid.Column="1" 
-                           Text="20" Foreground="White" 
-                           VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                    </Grid>
-
                     <!-- Options de performance -->
                 <CheckBox x:Name="LazyLoadingCheckBox" Style="{StaticResource SettingCheckBox}" Margin="0,15,0,5">
                     <TextBlock Text="Chargement différé des images" Foreground="White"/>

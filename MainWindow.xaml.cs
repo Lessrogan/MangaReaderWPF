@@ -79,6 +79,34 @@ namespace MangaReader
                 currentSortBy = settings.DefaultSortBy;
                 sortAscending = settings.SortAscending;
 
+                // Sélectionner la bonne option dans la ComboBox
+                foreach (ComboBoxItem item in ItemsPerPageComboBox.Items)
+                {
+                    if (item.Content.ToString() == itemsPerPage.ToString())
+                    {
+                        item.IsSelected = true;
+                        break;
+                    }
+                }
+
+                // Si la valeur sauvegardée n'est pas dans la liste, utiliser 20 par défaut
+                if (ItemsPerPageComboBox.SelectedItem == null)
+                {
+                    itemsPerPage = 20;
+                    settings.ItemsPerPage = 20;
+                    await settings.SaveAsync();
+
+                    // Sélectionner 20 dans la ComboBox
+                    foreach (ComboBoxItem item in ItemsPerPageComboBox.Items)
+                    {
+                        if (item.Content.ToString() == "20")
+                        {
+                            item.IsSelected = true;
+                            break;
+                        }
+                    }
+                }
+
                 // Initialiser la ComboBox avec la bonne valeur
                 InitializeItemsPerPageComboBox();
 
@@ -720,7 +748,7 @@ namespace MangaReader
         }
 
         // Ajout de la gestion du changement de nombre d'items par page
-        private void ItemsPerPageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void ItemsPerPageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isInitialized) return;
 
@@ -732,7 +760,7 @@ namespace MangaReader
 
                 // Sauvegarder la préférence
                 settings.ItemsPerPage = itemsPerPage;
-                _ = settings.SaveAsync();
+                await settings.SaveAsync();
 
                 // Réappliquer l'affichage
                 CalculatePagination();

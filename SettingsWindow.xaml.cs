@@ -139,8 +139,6 @@ namespace MangaReader
             PreloadNextPagesCheckBox.IsChecked = settings.PreloadNextPages;
             PreloadCountSlider.Value = settings.PreloadPageCount;
             PreloadCountText.Text = settings.PreloadPageCount.ToString();
-
-            ItemsPerPageSlider.Value = settings.ItemsPerPage;
         }
 
         public void ShowPanel(string panelName)
@@ -313,14 +311,6 @@ namespace MangaReader
 
                 LoadSettings();
                 MessageBox.Show("Les paramètres ont été réinitialisés.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
-
-        private void ItemsPerPageSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (ItemsPerPageText != null)
-            {
-                ItemsPerPageText.Text = ((int)e.NewValue).ToString();
             }
         }
 
@@ -504,8 +494,6 @@ namespace MangaReader
 
                 // Mettre à jour le cache manager
                 cacheManager.UpdateCacheSettings();
-
-                settings.ItemsPerPage = (int)ItemsPerPageSlider.Value;
 
                 DialogResult = true;
                 Close();
