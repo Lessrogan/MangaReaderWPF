@@ -198,7 +198,8 @@ Consultez la section Résolution de problèmes
 - Todo check filtre ET tri
 - fix pagination -> pas le bon nombre d'élement par page -> actualisation automatique si possible
  |-> apres "fix" le changement de valeur du nombre de miniature par page ne fonctionne pas via l'ecran paramétrage (le nombre d'élement par page via selecteur de la page d'acceuile fonctionne lui)
-- Todo fix l'actualisation vide les recemment lu est ce bon ?
+- Todo fix l'actualisation vide les recemment lu
+- Fix le choix des tags qui n'affiche que "tous les tags"
 
 Version : 2.0.0
 Dernière mise à jour : Décembre 2024

@@ -184,7 +184,7 @@ BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="2
 
                         <!-- Options de tri -->
                         <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,20,0">
-                            <TextBlock Text="Trier par :" Foreground="#CCCCCC" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="Trier par :" Foreground="{DynamicResource TextPrimaryColor}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                             <ComboBox x:Name="SortByComboBox" Width="130" 
                                 Style="{StaticResource ThemedComboBox}"
                                 SelectionChanged="SortByComboBox_SelectionChanged">
@@ -210,13 +210,13 @@ BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="2
                         <TextBlock Grid.Column="1" 
                        x:Name="PaginationInfoText" 
                        Text="0 mangas trouvés" 
-                       Foreground="#CCCCCC" 
+                       Foreground="{DynamicResource TextPrimaryColor}"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"/>
 
                         <!-- Nombre par page -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,20,0">
-                            <TextBlock Text="Par page :" Foreground="#CCCCCC" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="Par page :" Foreground="{DynamicResource TextPrimaryColor}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                             <ComboBox x:Name="ItemsPerPageComboBox" Width="60" Style="{StaticResource ThemedComboBox}" SelectionChanged="ItemsPerPageComboBox_SelectionChanged">
                                 <ComboBoxItem Content="10"/>
                                 <ComboBoxItem Content="20" IsSelected="True"/>
@@ -229,16 +229,16 @@ BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="2
                         <!-- Navigation des pages -->
                         <StackPanel Grid.Column="3" Orientation="Horizontal">
                             <Button x:Name="FirstPageButton" Content="⏮" Width="30" Margin="2" Click="FirstPage_Click" IsEnabled="False"
-                        Background="#2d2d30" Foreground="White" BorderBrush="#404040"/>
+                        Background="#2d2d30" Foreground="{DynamicResource ComboBoxForegroundColor}" BorderBrush="#404040"/>
                             <Button x:Name="PreviousPageButton" Content="◀" Width="30" Margin="2" Click="PreviousPage_Click" IsEnabled="False"
-                        Background="#2d2d30" Foreground="White" BorderBrush="#404040"/>
+                        Background="#2d2d30" Foreground="{DynamicResource ComboBoxForegroundColor}" BorderBrush="#404040"/>
                             <Border Background="#2d2d30" BorderBrush="#404040" BorderThickness="1" CornerRadius="3" Padding="10,5" Margin="5,0">
-                                <TextBlock x:Name="CurrentPageText" Text="Page 1 / 1" Foreground="White" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="CurrentPageText" Text="Page 1 / 1" Foreground="{DynamicResource TextPrimaryColor}" VerticalAlignment="Center"/>
                             </Border>
                             <Button x:Name="NextPageButton" Content="▶" Width="30" Margin="2" Click="NextPage_Click"
-                        Background="#2d2d30" Foreground="White" BorderBrush="#404040"/>
+                        Background="#2d2d30" Foreground="{DynamicResource ComboBoxForegroundColor}" BorderBrush="#404040"/>
                             <Button x:Name="LastPageButton" Content="⏭" Width="30" Margin="2" Click="LastPage_Click"
-                        Background="#2d2d30" Foreground="White" BorderBrush="#404040"/>
+                        Background="#2d2d30" Foreground="{DynamicResource ComboBoxForegroundColor}" BorderBrush="#404040"/>
                         </StackPanel>
                     </Grid>
                 </Grid>
@@ -320,7 +320,7 @@ BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="2
                         <!-- Message si aucun manga -->
                         <TextBlock x:Name="NoMangasText" 
                                    Text="Aucun manga trouvé. Vérifiez le dossier de mangas dans les paramètres."
-                                   Foreground="#888888"
+                                   Foreground="{DynamicResource TextPrimaryColor}"
                                    FontStyle="Italic"
                                    Visibility="Collapsed"
                                    Margin="10"/>
@@ -337,7 +337,7 @@ BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="2
 
             <StackPanel Margin="15">
                 <TextBlock Text="Actions" 
-                           Foreground="White" 
+                           Foreground="{DynamicResource TextPrimaryColor}"
                            FontSize="16" 
                            FontWeight="SemiBold"
                            Margin="0,0,0,15"/>
@@ -398,32 +398,32 @@ BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="2
                 <!-- Statistiques -->
                 <StackPanel Margin="0,30,0,0">
                     <TextBlock Text="Statistiques" 
-                               Foreground="#CCCCCC" 
+                               Foreground="{DynamicResource TextPrimaryColor}"
                                FontSize="12" 
                                FontWeight="SemiBold"
                                Margin="0,0,0,10"/>
 
                     <TextBlock x:Name="TotalMangasText" 
                                Text="Total: 0 mangas"
-                               Foreground="#888888" 
+                               Foreground="{DynamicResource TextPrimaryColor}"
                                FontSize="11"
                                Margin="5,2"/>
 
                     <TextBlock x:Name="FavoritesCountText" 
                                Text="Favoris: 0"
-                               Foreground="#888888" 
+                               Foreground="{DynamicResource TextPrimaryColor}"
                                FontSize="11"
                                Margin="5,2"/>
 
                     <TextBlock x:Name="RecentCountText" 
                                Text="Lus récemment: 0"
-                               Foreground="#888888" 
+                               Foreground="{DynamicResource TextPrimaryColor}"
                                FontSize="11"
                                Margin="5,2"/>
 
                     <TextBlock x:Name="ArchivesCountText" 
                                Text="Archives: 0"
-                               Foreground="#888888" 
+                               Foreground="{DynamicResource TextPrimaryColor}"
                                FontSize="11"
                                Margin="5,2"/>
                 </StackPanel>
@@ -431,7 +431,7 @@ BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="2
                 <!-- Info cache -->
                 <StackPanel Margin="0,20,0,0">
                     <TextBlock Text="Cache" 
-                               Foreground="#CCCCCC" 
+                               Foreground="{DynamicResource TextPrimaryColor}"
                                FontSize="12" 
                                FontWeight="SemiBold"
                                Margin="0,0,0,10"/>

@@ -44,6 +44,7 @@ namespace MangaReader
             dict["TextSecondaryColor"] = new SolidColorBrush(Color.FromRgb(204, 204, 204));
             dict["TextDisabledColor"] = new SolidColorBrush(Color.FromRgb(136, 136, 136));
 
+
             // Accent et interactions
             dict["AccentColor"] = new SolidColorBrush(Color.FromRgb(0, 122, 204));
             dict["HoverColor"] = new SolidColorBrush(Color.FromRgb(61, 61, 64));
@@ -51,8 +52,8 @@ namespace MangaReader
 
             // ComboBox spécifique
             dict["ComboBoxBackgroundColor"] = new SolidColorBrush(Color.FromRgb(45, 45, 48));
-            dict["ComboBoxForegroundColor"] = new SolidColorBrush(Colors.White);
-            dict["ComboBoxDropDownColor"] = new SolidColorBrush(Color.FromRgb(37, 37, 38));
+            dict["ComboBoxForegroundColor"] = new SolidColorBrush(Colors.Black);
+            dict["ComboBoxDropDownColor"] = new SolidColorBrush(Colors.White);
         }
 
         private static void ApplyLightTheme(ResourceDictionary dict)

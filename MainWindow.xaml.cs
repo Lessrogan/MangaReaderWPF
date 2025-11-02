@@ -343,6 +343,7 @@ namespace MangaReader
             try
             {
                 allTags = await database.GetAllTagsAsync();
+                System.Diagnostics.Debug.WriteLine($"AllTags: {string.Join(',', allTags)}");
 
                 TagFilterComboBox.Items.Clear();
                 TagFilterComboBox.Items.Add(new ComboBoxItem { Content = "Tous les tags", IsSelected = true });
