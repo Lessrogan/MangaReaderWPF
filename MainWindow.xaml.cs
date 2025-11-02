@@ -342,20 +342,57 @@ namespace MangaReader
         {
             try
             {
-                allTags = await database.GetAllTagsAsync();
-                System.Diagnostics.Debug.WriteLine($"AllTags: {string.Join(',', allTags)}");
+                // Charger les tags depuis le TagsManager (fichier JSON)
+                var tagsFromManager = TagsManager.Instance.AvailableTags;
 
+                // Charger aussi les tags existants dans la base de données
+                var tagsFromDatabase = await database.GetAllTagsAsync();
+
+                // Combiner les deux listes sans doublons
+                var allUniqueTags = new HashSet<string>();
+
+                // Ajouter les tags du manager
+                foreach (var tag in tagsFromManager)
+                {
+                    allUniqueTags.Add(tag);
+                }
+
+                // Ajouter les tags de la base de données
+                foreach (var tag in tagsFromDatabase)
+                {
+                    allUniqueTags.Add(tag);
+                }
+
+                // Trier alphabétiquement
+                allTags = allUniqueTags.OrderBy(t => t).ToList();
+
+                // Remplir la ComboBox
                 TagFilterComboBox.Items.Clear();
-                TagFilterComboBox.Items.Add(new ComboBoxItem { Content = "Tous les tags", IsSelected = true });
 
+                // Toujours ajouter "Tous les tags" en premier
+                var allTagsItem = new ComboBoxItem
+                {
+                    Content = "Tous les tags",
+                    IsSelected = true
+                };
+                TagFilterComboBox.Items.Add(allTagsItem);
+
+                // Ajouter chaque tag disponible
                 foreach (var tag in allTags)
                 {
-                    TagFilterComboBox.Items.Add(new ComboBoxItem { Content = tag });
+                    var item = new ComboBoxItem { Content = tag };
+                    TagFilterComboBox.Items.Add(item);
                 }
+
+                System.Diagnostics.Debug.WriteLine($"Chargé {allTags.Count} tags dans le filtre");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Erreur chargement tags: {ex.Message}");
+
+                // En cas d'erreur, au minimum avoir "Tous les tags"
+                TagFilterComboBox.Items.Clear();
+                TagFilterComboBox.Items.Add(new ComboBoxItem { Content = "Tous les tags", IsSelected = true });
             }
         }
 
@@ -993,6 +1030,8 @@ namespace MangaReader
                     settings = AppSettings.Instance;
                     await LoadMangasAsync();
                 }
+
+                await LoadTagsAsync();
 
                 UpdateCacheStats();
             }
