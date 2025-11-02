@@ -199,7 +199,7 @@ Consultez la section Résolution de problèmes
 - fix pagination -> pas le bon nombre d'élement par page -> actualisation automatique si possible
  |-> apres "fix" le changement de valeur du nombre de miniature par page ne fonctionne pas via l'ecran paramétrage (le nombre d'élement par page via selecteur de la page d'acceuile fonctionne lui)
 - Todo fix l'actualisation vide les recemment lu
-- Fix le choix des tags qui n'affiche que "tous les tags"
+- Faire ne sorte de ne plus avoir besoin de tags.json (charger en base au 1er demarrage des tags (voir ne meme pas faire ça et se contenter destags que l'on peut mettre en paramétrage revert commit 9f6d5e0))
 
 Version : 2.0.0
 Dernière mise à jour : Décembre 2024
