@@ -185,7 +185,6 @@ Consultez la section Résolution de problèmes
 
 //TODO
 
-- Ajouter un système de pagination
 - Localization des trads
 - Actualisation automatique lors d'un changement de répertoire // garder le bouton actualiser si on rajoute des fichiers dans le repertoire
 - Bouton Random ne met pas de pop up et met direct la preview du manga ( qui devrait aussi afficher un bouton random si on vient depuis le randomiseur)
@@ -196,10 +195,9 @@ Consultez la section Résolution de problèmes
 - Check quoi faire avec le compteur quand defilement
 - Todo verif si ça fonctionne les favoris
 - Todo check filtre ET tri
-- fix pagination -> pas le bon nombre d'élement par page -> actualisation automatique si possible
- |-> apres "fix" le changement de valeur du nombre de miniature par page ne fonctionne pas via l'ecran paramétrage (le nombre d'élement par page via selecteur de la page d'acceuile fonctionne lui)
 - Todo fix l'actualisation vide les recemment lu
 - Faire ne sorte de ne plus avoir besoin de tags.json (charger en base au 1er demarrage des tags (voir ne meme pas faire ça et se contenter destags que l'on peut mettre en paramétrage revert commit 9f6d5e0))
+- Fair een sorte de ne plus avoir besoin de save les modifs d'un mangas
 
 Version : 2.0.0
 Dernière mise à jour : Décembre 2024

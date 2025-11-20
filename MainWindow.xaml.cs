@@ -512,21 +512,51 @@ namespace MangaReader
                 bool isArchive = File.Exists(itemPath) &&
                                 new[] { ".cbz", ".cbr", ".zip", ".rar" }.Contains(Path.GetExtension(itemPath).ToLower());
 
+                // IMPORTANT : Toujours essayer de récupérer depuis la base d'abord
+                MangaInfo existingManga = null;
+                try
+                {
+                    existingManga = await database.GetMangaByPathAsync(itemPath);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Erreur récupération manga DB: {ex.Message}");
+                }
+
                 var mangaInfo = new MangaInfoViewModel
                 {
-                    Title = mangaName ?? "Sans titre",
-                    Author = "Auteur inconnu",
+                    // Utiliser les données existantes si disponibles
+                    Title = existingManga?.Title ?? mangaName ?? "Sans titre",
+                    Author = existingManga?.Author ?? "Auteur inconnu",
                     FolderPath = itemPath,
-                    LastRead = null,
-                    IsFavorite = false,
-                    Tags = "",
-                    Characters = "",
-                    Description = "",
+                    LastRead = existingManga?.LastRead,
+                    IsFavorite = existingManga?.IsFavorite ?? false,
+                    Tags = existingManga?.Tags ?? "",
+                    Characters = existingManga?.Characters ?? "",
+                    Description = existingManga?.Description ?? "",
                     IsArchive = isArchive,
-                    Rating = 0,
-                    PageCount = 0,
+                    Rating = existingManga?.Rating ?? 0,
+                    PageCount = existingManga?.PageCount ?? 0,
                     CoverImage = null
                 };
+
+                // Si c'est un nouveau manga, l'ajouter à la base
+                if (existingManga == null)
+                {
+                    try
+                    {
+                        await database.AddMangaAsync(mangaInfo);
+                        System.Diagnostics.Debug.WriteLine($"Nouveau manga ajouté: {mangaInfo.Title}");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Erreur ajout DB: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Manga existant chargé: {mangaInfo.Title} (Favori: {mangaInfo.IsFavorite}, Tags: {mangaInfo.Tags})");
+                }
 
                 // Charger l'image si demandé
                 if (loadImage)

@@ -105,26 +105,55 @@ namespace MangaReader
             using var connection = new SQLiteConnection(connectionString);
             await connection.OpenAsync();
 
-            var query = @"
-                INSERT OR REPLACE INTO Mangas 
-                (Title, Author, FolderPath, LastRead, IsFavorite, Tags, Characters, Description, IsArchive, ArchivePath, PageCount, Rating)
-                VALUES (@title, @author, @folderPath, @lastRead, @isFavorite, @tags, @characters, @description, @isArchive, @archivePath, @pageCount, @rating)";
+            // Vérifier si le manga existe déjà
+            var checkQuery = "SELECT Id FROM Mangas WHERE FolderPath = @folderPath";
+            object existingId = null;
 
-            using var command = new SQLiteCommand(query, connection);
-            command.Parameters.AddWithValue("@title", manga.Title);
-            command.Parameters.AddWithValue("@author", manga.Author);
-            command.Parameters.AddWithValue("@folderPath", manga.FolderPath);
-            command.Parameters.AddWithValue("@lastRead", (object)manga.LastRead ?? DBNull.Value);
-            command.Parameters.AddWithValue("@isFavorite", manga.IsFavorite);
-            command.Parameters.AddWithValue("@tags", manga.Tags ?? "");
-            command.Parameters.AddWithValue("@characters", manga.Characters ?? "");
-            command.Parameters.AddWithValue("@description", manga.Description ?? "");
-            command.Parameters.AddWithValue("@isArchive", ArchiveHandler.IsArchiveFile(manga.FolderPath));
-            command.Parameters.AddWithValue("@archivePath", ArchiveHandler.IsArchiveFile(manga.FolderPath) ? manga.FolderPath : null);
-            command.Parameters.AddWithValue("@pageCount", manga.PageCount);
-            command.Parameters.AddWithValue("@rating", manga.Rating);
+            using (var checkCommand = new SQLiteCommand(checkQuery, connection))
+            {
+                checkCommand.Parameters.AddWithValue("@folderPath", manga.FolderPath);
+                existingId = await checkCommand.ExecuteScalarAsync();
+            }
 
-            await command.ExecuteNonQueryAsync();
+            if (existingId != null)
+            {
+                // Le manga existe, faire un UPDATE sélectif
+                var updateQuery = @"
+            UPDATE Mangas 
+            SET Title = @title,
+                UpdatedDate = CURRENT_TIMESTAMP
+            WHERE FolderPath = @folderPath";
+
+                using var updateCommand = new SQLiteCommand(updateQuery, connection);
+                updateCommand.Parameters.AddWithValue("@title", manga.Title);
+                updateCommand.Parameters.AddWithValue("@folderPath", manga.FolderPath);
+
+                await updateCommand.ExecuteNonQueryAsync();
+            }
+            else
+            {
+                // Nouveau manga, faire un INSERT
+                var insertQuery = @"
+            INSERT INTO Mangas 
+            (Title, Author, FolderPath, LastRead, IsFavorite, Tags, Characters, Description, IsArchive, ArchivePath, PageCount, Rating)
+            VALUES (@title, @author, @folderPath, @lastRead, @isFavorite, @tags, @characters, @description, @isArchive, @archivePath, @pageCount, @rating)";
+
+                using var insertCommand = new SQLiteCommand(insertQuery, connection);
+                insertCommand.Parameters.AddWithValue("@title", manga.Title);
+                insertCommand.Parameters.AddWithValue("@author", manga.Author ?? "Auteur inconnu");
+                insertCommand.Parameters.AddWithValue("@folderPath", manga.FolderPath);
+                insertCommand.Parameters.AddWithValue("@lastRead", (object)manga.LastRead ?? DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@isFavorite", manga.IsFavorite);
+                insertCommand.Parameters.AddWithValue("@tags", manga.Tags ?? "");
+                insertCommand.Parameters.AddWithValue("@characters", manga.Characters ?? "");
+                insertCommand.Parameters.AddWithValue("@description", manga.Description ?? "");
+                insertCommand.Parameters.AddWithValue("@isArchive", ArchiveHandler.IsArchiveFile(manga.FolderPath));
+                insertCommand.Parameters.AddWithValue("@archivePath", ArchiveHandler.IsArchiveFile(manga.FolderPath) ? manga.FolderPath : null);
+                insertCommand.Parameters.AddWithValue("@pageCount", manga.PageCount);
+                insertCommand.Parameters.AddWithValue("@rating", manga.Rating);
+
+                await insertCommand.ExecuteNonQueryAsync();
+            }
         }
 
         public async Task<MangaInfo> GetMangaByPathAsync(string folderPath)
