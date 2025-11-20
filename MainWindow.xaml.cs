@@ -1020,14 +1020,7 @@ namespace MangaReader
             var random = new Random();
             var randomManga = filteredMangas[random.Next(filteredMangas.Count)];
 
-            var result = MessageBox.Show(
-                $"Manga sélectionné : {randomManga.Title}\n\nVoulez-vous l'ouvrir ?",
-                "Manga aléatoire", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                await OpenManga(randomManga);
-            }
+            await OpenManga(randomManga);
         }
 
         private async void RefreshButton_Click(object sender, RoutedEventArgs e)
