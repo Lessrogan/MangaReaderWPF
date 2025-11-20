@@ -187,17 +187,19 @@ Consultez la section Résolution de problèmes
 
 - Localization des trads
 - Actualisation automatique lors d'un changement de répertoire // garder le bouton actualiser si on rajoute des fichiers dans le repertoire
-- Bouton Random ne met pas de pop up et met direct la preview du manga ( qui devrait aussi afficher un bouton random si on vient depuis le randomiseur)
 - Paramètres 
 	-> sauvegarder le thèmes choisit
 	-> nombre de prévisualisation (doit afficher toutes les images) 
 	-> TODO vérif import et export
 - Check quoi faire avec le compteur quand defilement
-- Todo verif si ça fonctionne les favoris
 - Todo check filtre ET tri
 - Todo fix l'actualisation vide les recemment lu
 - Faire ne sorte de ne plus avoir besoin de tags.json (charger en base au 1er demarrage des tags (voir ne meme pas faire ça et se contenter destags que l'on peut mettre en paramétrage revert commit 9f6d5e0))
-- Fair een sorte de ne plus avoir besoin de save les modifs d'un mangas
-
+- Fair en sorte de ne plus avoir besoin de save les modifs d'un mangas
+- Dans les manags lu recemment (si le manga n'est pas dans la pagination courante l'image n'est pas affiché)
+- Ajout bouton resize image quand lecture page simple
+- Bouton random ne fait que dans la pagination courante
+-sauvegarde des thèmes ne fonctionne pas
+- trier par note ? aucun moyen d emettre de snotes, par auteur, on rentr eou le nom de l'auteur ? par date fonctionne pas; dernière lecture non plus
 Version : 2.0.0
 Dernière mise à jour : Décembre 2024
