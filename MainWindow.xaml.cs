@@ -28,6 +28,7 @@ namespace MangaReader
         private string currentSearchTerm = "";
         private string currentTagFilter = null;
         private bool showFavoritesOnly = false;
+        private MangaDetailsWindow currentDetailsWindow = null;
 
         // Variables de pagination
         private int currentPage = 1;
@@ -923,9 +924,25 @@ namespace MangaReader
         {
             try
             {
-                var detailsWindow = new MangaDetailsWindow(mangaInfo);
-                detailsWindow.Closed += async (s, e) => await RefreshRecentMangas();
-                detailsWindow.Show();
+                // Fermer la fenêtre de détails précédente si elle existe
+                if (currentDetailsWindow != null && currentDetailsWindow.IsLoaded)
+                {
+                    currentDetailsWindow.Close();
+                    currentDetailsWindow = null;
+                }
+
+                // Ouvrir la nouvelle fenêtre
+                currentDetailsWindow = new MangaDetailsWindow(mangaInfo);
+                currentDetailsWindow.Closed += async (s, e) =>
+                {
+                    // Nettoyer la référence quand la fenêtre est fermée
+                    if (currentDetailsWindow == s)
+                    {
+                        currentDetailsWindow = null;
+                    }
+                    await RefreshRecentMangas();
+                };
+                currentDetailsWindow.Show();
             }
             catch (Exception ex)
             {
