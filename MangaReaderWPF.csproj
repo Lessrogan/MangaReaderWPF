@@ -49,6 +49,12 @@
 	  <None Include="E:\Utils\App\MangaReaderWPF\.editorconfig" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Folder Include="Assets\" />
+		<Resource Include="Assets/Icon.ico" />
+		<Resource Include="Assets/Icon2.ico" />
+	</ItemGroup>
+
 	<!--<ItemGroup>
 	<None Update="appsettings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -1027,16 +1027,18 @@ namespace MangaReader
 
         private async void RandomMangaButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!filteredMangas.Any())
+            if (!allMangas.Any())
             {
                 MessageBox.Show("Aucun manga disponible", "Manga aléatoire",
                               MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
+            // Sélectionner un manga au hasard parmi TOUS les mangas
             var random = new Random();
-            var randomManga = filteredMangas[random.Next(filteredMangas.Count)];
+            var randomManga = allMangas[random.Next(allMangas.Count)];
 
+            // OpenManga fermera automatiquement la fenêtre précédente si elle existe
             await OpenManga(randomManga);
         }
 

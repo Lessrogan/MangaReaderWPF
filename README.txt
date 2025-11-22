@@ -200,6 +200,6 @@ Consultez la section Résolution de problèmes
 - Ajout bouton resize image quand lecture page simple
 - Bouton random ne fait que dans la pagination courante
 -sauvegarde des thèmes ne fonctionne pas
-- trier par note ? aucun moyen d emettre de snotes, par auteur, on rentr eou le nom de l'auteur ? par date fonctionne pas; dernière lecture non plus
+- trier par note ? aucun moyen d emettre de snotes, par auteur, on rentr eou le nom de l'auteur ? par date fonctionne pas; dernière lecture non plus + !!! ne saffectue que sur la pagination courante
 Version : 2.0.0
 Dernière mise à jour : Décembre 2024
