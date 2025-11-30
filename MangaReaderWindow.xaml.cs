@@ -101,15 +101,25 @@ namespace MangaReader
                     return;
                 }
 
-                // Initialiser l'affichage des pages (au lieu du slider)
+                // Initialiser les contrôles
                 TotalPagesText.Text = imageFiles.Count.ToString();
                 CurrentPageTextBox.Text = (currentPageIndex + 1).ToString();
 
                 // Marquer comme initialisé
                 isInitialized = true;
 
+                // IMPORTANT : S'assurer que le mode FitToWindow est activé par défaut
+                isFitToWindow = true;
+
                 UpdatePageDisplay();
                 LoadCurrentPage();
+
+                // Forcer une mise à jour de l'affichage après un court délai
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    ApplyImageStretch();
+                    UpdateFitToWindowButton();
+                }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
             }
             catch (Exception ex)
             {
@@ -254,8 +264,15 @@ namespace MangaReader
             actualImageWidth = bitmap.PixelWidth;
             actualImageHeight = bitmap.PixelHeight;
 
-            // Appliquer le mode de redimensionnement actuel
-            ApplyImageStretch();
+            // IMPORTANT : Forcer le layout à se mettre à jour
+            CurrentPageImage.UpdateLayout();
+            SinglePageScrollViewer.UpdateLayout();
+
+            // Appliquer le mode de redimensionnement actuel APRÈS la mise à jour du layout
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                ApplyImageStretch();
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
         private void FitToWindowButton_Click(object sender, RoutedEventArgs e)
@@ -267,30 +284,38 @@ namespace MangaReader
 
         private void ApplyImageStretch()
         {
-            if (CurrentPageImage == null) return;
+            if (CurrentPageImage == null || CurrentPageImage.Source == null) return;
 
             if (isFitToWindow)
             {
-                // Ajuster complètement à la fenêtre SANS scrollbars
+                // Ajuster complètement à la fenêtre
                 CurrentPageImage.Stretch = System.Windows.Media.Stretch.Uniform;
                 CurrentPageImage.Width = double.NaN;  // Auto
                 CurrentPageImage.Height = double.NaN; // Auto
-                CurrentPageImage.MaxWidth = SinglePageScrollViewer.ViewportWidth;
-                CurrentPageImage.MaxHeight = SinglePageScrollViewer.ViewportHeight;
+
+                // S'assurer que l'image est visible
+                if (SinglePageScrollViewer.ViewportWidth > 0 && SinglePageScrollViewer.ViewportHeight > 0)
+                {
+                    CurrentPageImage.MaxWidth = SinglePageScrollViewer.ViewportWidth;
+                    CurrentPageImage.MaxHeight = SinglePageScrollViewer.ViewportHeight;
+                }
+                else
+                {
+                    // Si la fenêtre n'est pas encore rendue, utiliser la taille de la fenêtre
+                    CurrentPageImage.MaxWidth = this.ActualWidth - 50; // Marge de sécurité
+                    CurrentPageImage.MaxHeight = this.ActualHeight - 150; // Tenir compte des barres d'outils
+                }
+
                 CurrentPageImage.HorizontalAlignment = HorizontalAlignment.Center;
                 CurrentPageImage.VerticalAlignment = VerticalAlignment.Center;
 
-                // Désactiver les scrollbars quand ajusté à la fenêtre
+                // Désactiver les scrollbars
                 SinglePageScrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
                 SinglePageScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
-
-                // Réinitialiser la position
-                SinglePageScrollViewer.ScrollToVerticalOffset(0);
-                SinglePageScrollViewer.ScrollToHorizontalOffset(0);
             }
             else
             {
-                // Taille réelle avec scrollbars si nécessaire
+                // Taille réelle
                 CurrentPageImage.Stretch = System.Windows.Media.Stretch.None;
                 CurrentPageImage.Width = actualImageWidth;
                 CurrentPageImage.Height = actualImageHeight;
@@ -299,10 +324,14 @@ namespace MangaReader
                 CurrentPageImage.HorizontalAlignment = HorizontalAlignment.Center;
                 CurrentPageImage.VerticalAlignment = VerticalAlignment.Center;
 
-                // Réactiver les scrollbars pour la taille réelle
+                // Activer les scrollbars
                 SinglePageScrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
                 SinglePageScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
             }
+
+            // Forcer la mise à jour visuelle
+            CurrentPageImage.UpdateLayout();
+            SinglePageScrollViewer.UpdateLayout();
         }
 
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
