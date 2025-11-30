@@ -197,9 +197,7 @@ Consultez la section Résolution de problèmes
 - Faire ne sorte de ne plus avoir besoin de tags.json (charger en base au 1er demarrage des tags (voir ne meme pas faire ça et se contenter destags que l'on peut mettre en paramétrage revert commit 9f6d5e0))
 - Fair en sorte de ne plus avoir besoin de save les modifs d'un mangas
 - Dans les manags lu recemment (si le manga n'est pas dans la pagination courante l'image n'est pas affiché)
-- Ajout bouton resize image quand lecture page simple
-- Bouton random ne fait que dans la pagination courante
--sauvegarde des thèmes ne fonctionne pas
-- trier par note ? aucun moyen d emettre de snotes, par auteur, on rentr eou le nom de l'auteur ? par date fonctionne pas; dernière lecture non plus + !!! ne saffectue que sur la pagination courante
+- sauvegarde des thèmes ne fonctionne pas
+- trier par note ? aucun moyen de mettre de snotes, par auteur, on rentre ou le nom de l'auteur ? par date fonctionne pas
 Version : 2.0.0
 Dernière mise à jour : Décembre 2024

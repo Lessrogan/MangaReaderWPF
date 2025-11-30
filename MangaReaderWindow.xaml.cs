@@ -19,6 +19,10 @@ namespace MangaReader
         private WindowStyle previousWindowStyle;
         private bool isInitialized = false; // Flag pour éviter les appels prématurés
 
+        private bool isFitToWindow = true;
+        private double actualImageWidth = 0;
+        private double actualImageHeight = 0;
+
         public MangaReaderWindow(MangaInfo manga)
         {
             InitializeComponent();
@@ -193,11 +197,9 @@ namespace MangaReader
 
         private void LoadCurrentPage()
         {
-            // Ne rien faire si pas encore initialisé
             if (!isInitialized)
                 return;
 
-            // Vérification de sécurité
             if (imageFiles == null || !imageFiles.Any())
             {
                 MessageBox.Show("Aucune image chargée.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -215,6 +217,7 @@ namespace MangaReader
                 {
                     case 0: // Page simple
                         LoadSinglePage();
+                        UpdateFitToWindowButton(); // Nouvelle ligne
                         break;
                     case 1: // Double page
                         LoadDoublePage();
@@ -224,7 +227,7 @@ namespace MangaReader
                         break;
                 }
 
-                //PageSlider.Value = currentPageIndex + 1;
+                CurrentPageTextBox.Text = (currentPageIndex + 1).ToString();
                 UpdatePageDisplay();
             }
             catch (Exception ex)
@@ -246,6 +249,105 @@ namespace MangaReader
             bitmap.EndInit();
 
             CurrentPageImage.Source = bitmap;
+
+            // Sauvegarder les dimensions réelles de l'image
+            actualImageWidth = bitmap.PixelWidth;
+            actualImageHeight = bitmap.PixelHeight;
+
+            // Appliquer le mode de redimensionnement actuel
+            ApplyImageStretch();
+        }
+
+        private void FitToWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+            isFitToWindow = !isFitToWindow;
+            ApplyImageStretch();
+            UpdateFitToWindowButton();
+        }
+
+        private void ApplyImageStretch()
+        {
+            if (CurrentPageImage == null) return;
+
+            if (isFitToWindow)
+            {
+                // Ajuster complètement à la fenêtre SANS scrollbars
+                CurrentPageImage.Stretch = System.Windows.Media.Stretch.Uniform;
+                CurrentPageImage.Width = double.NaN;  // Auto
+                CurrentPageImage.Height = double.NaN; // Auto
+                CurrentPageImage.MaxWidth = SinglePageScrollViewer.ViewportWidth;
+                CurrentPageImage.MaxHeight = SinglePageScrollViewer.ViewportHeight;
+                CurrentPageImage.HorizontalAlignment = HorizontalAlignment.Center;
+                CurrentPageImage.VerticalAlignment = VerticalAlignment.Center;
+
+                // Désactiver les scrollbars quand ajusté à la fenêtre
+                SinglePageScrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                SinglePageScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+
+                // Réinitialiser la position
+                SinglePageScrollViewer.ScrollToVerticalOffset(0);
+                SinglePageScrollViewer.ScrollToHorizontalOffset(0);
+            }
+            else
+            {
+                // Taille réelle avec scrollbars si nécessaire
+                CurrentPageImage.Stretch = System.Windows.Media.Stretch.None;
+                CurrentPageImage.Width = actualImageWidth;
+                CurrentPageImage.Height = actualImageHeight;
+                CurrentPageImage.MaxWidth = double.PositiveInfinity;
+                CurrentPageImage.MaxHeight = double.PositiveInfinity;
+                CurrentPageImage.HorizontalAlignment = HorizontalAlignment.Center;
+                CurrentPageImage.VerticalAlignment = VerticalAlignment.Center;
+
+                // Réactiver les scrollbars pour la taille réelle
+                SinglePageScrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+                SinglePageScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            }
+        }
+
+        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+            base.OnRenderSizeChanged(sizeInfo);
+
+            if (isFitToWindow && ReadingModeComboBox?.SelectedIndex == 0)
+            {
+                // Réappliquer le redimensionnement quand la fenêtre change de taille
+                ApplyImageStretch();
+            }
+        }
+
+        private void UpdateFitToWindowButton()
+        {
+            if (FitToWindowButton == null) return;
+
+            // Mettre à jour l'apparence du bouton selon l'état
+            if (isFitToWindow)
+            {
+                FitToWindowButton.ToolTip = "Afficher en taille réelle";
+                var textBlock = FitToWindowButton.Content as TextBlock;
+                if (textBlock != null)
+                {
+                    textBlock.Text = "⇔"; // Icône d'expansion
+                }
+                FitToWindowButton.Background = new System.Windows.Media.SolidColorBrush(
+                    System.Windows.Media.Color.FromRgb(0, 122, 204)); // Bleu quand actif
+            }
+            else
+            {
+                FitToWindowButton.ToolTip = "Ajuster à la fenêtre";
+                var textBlock = FitToWindowButton.Content as TextBlock;
+                if (textBlock != null)
+                {
+                    textBlock.Text = "↔"; // Icône de contraction
+                }
+                FitToWindowButton.Background = new System.Windows.Media.SolidColorBrush(
+                    System.Windows.Media.Color.FromRgb(45, 45, 48)); // Gris quand inactif
+            }
+
+            // Masquer le bouton si on n'est pas en mode page simple
+            FitToWindowButton.Visibility = ReadingModeComboBox.SelectedIndex == 0
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
 
         private void LoadDoublePage()
@@ -413,11 +515,13 @@ namespace MangaReader
 
         private void ReadingModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Ne rien faire si pas encore initialisé
             if (!isInitialized)
                 return;
 
             LoadCurrentPage();
+
+            // Masquer/afficher le bouton de redimensionnement selon le mode
+            UpdateFitToWindowButton();
         }
 
         private async void FavoriteButton_Click(object sender, RoutedEventArgs e)
@@ -480,6 +584,12 @@ namespace MangaReader
                     break;
                 case Key.F11:
                     FullscreenButton_Click(sender, null);
+                    break;
+                case Key.F: // F pour Fit
+                    if (ReadingModeComboBox.SelectedIndex == 0) // Si en mode page simple
+                    {
+                        FitToWindowButton_Click(sender, null);
+                    }
                     break;
                 case Key.Escape:
                     if (isFullscreen)

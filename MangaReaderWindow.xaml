@@ -33,11 +33,12 @@
 
         <!-- Barre d'outils -->
         <Border Grid.Row="0" Background="{DynamicResource SecondaryBackgroundColor}"
-BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="10">
+            BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="10">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
@@ -78,9 +79,19 @@ BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="1
                     <ComboBoxItem Content="Défilement continu"/>
                 </ComboBox>
 
+                <!-- Bouton Ajuster à la fenêtre -->
+                <Button x:Name="FitToWindowButton" 
+                Grid.Column="3"
+                Style="{StaticResource ReaderButton}"
+                Click="FitToWindowButton_Click"
+                Margin="5,0"
+                ToolTip="Ajuster à la fenêtre">
+                    <TextBlock Text="⇔" FontSize="18"/>
+                </Button>
+
                 <!-- Bouton Plein écran -->
                 <Button x:Name="FullscreenButton" 
-                        Grid.Column="3"
+                        Grid.Column="4"
                         Style="{StaticResource ReaderButton}"
                         Click="FullscreenButton_Click"
                         Margin="5,0">
@@ -89,7 +100,7 @@ BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="1
 
                 <!-- Bouton Favoris -->
                 <Button x:Name="FavoriteButton" 
-                        Grid.Column="4"
+                        Grid.Column="5"
                         Style="{StaticResource ReaderButton}"
                         Click="FavoriteButton_Click"
                         Margin="5,0,0,0">
@@ -104,7 +115,7 @@ BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="1
             <ScrollViewer x:Name="SinglePageScrollViewer" 
                   HorizontalScrollBarVisibility="Auto"
                   VerticalScrollBarVisibility="Auto"
-                  CanContentScroll="True"
+                  CanContentScroll="False"
                   Visibility="Visible">
                 <Grid>
                     <!-- Image centrée -->
