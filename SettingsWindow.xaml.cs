@@ -479,8 +479,10 @@ namespace MangaReader
         {
             try
             {
+                var settings = AppSettings.Instance;
+
                 // Général
-                settings.MangaFolderPath = MangaFolderTextBox.Text;
+                settings.MangaFolderPath = MangaFolderTextBox.Text.Trim();
                 settings.SupportArchiveFiles = SupportArchivesCheckBox.IsChecked ?? true;
                 settings.SaveReadingPosition = SaveReadingPositionCheckBox.IsChecked ?? true;
 

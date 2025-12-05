@@ -53,6 +53,16 @@ namespace MangaReader
         {
             try
             {
+                // Debug : vérifier les fichiers de configuration
+                var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                var mangaReaderPath = Path.Combine(appDataPath, "MangaReader");
+                var settingsPath = Path.Combine(mangaReaderPath, "settings.json");
+
+                if (File.Exists(settingsPath))
+                {
+                    var content = File.ReadAllText(settingsPath);
+                }
+
                 // Initialiser les composants
                 settings = AppSettings.Instance;
                 cacheManager = ImageCacheManager.Instance;

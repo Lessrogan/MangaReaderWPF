@@ -5,6 +5,27 @@ using System.Threading.Tasks;
 
 namespace MangaReader.Core
 {
+    // Classe DTO pour la sérialisation/désérialisation
+    internal class AppSettingsDto
+    {
+        public string MangaFolderPath { get; set; }
+        public string Theme { get; set; }
+        public bool SaveReadingPosition { get; set; }
+        public int ThumbnailCacheSize { get; set; }
+        public bool EnableLazyLoading { get; set; }
+        public double DefaultZoomLevel { get; set; }
+        public string LastExportPath { get; set; }
+        public string LastImportPath { get; set; }
+        public bool SupportArchiveFiles { get; set; }
+        public int ImageCacheSize { get; set; }
+        public bool PreloadNextPages { get; set; }
+        public int PreloadPageCount { get; set; }
+        public int ItemsPerPage { get; set; }
+        public string DefaultSortBy { get; set; }
+        public bool SortAscending { get; set; }
+        public ThemeColors CustomTheme { get; set; }
+    }
+
     public class AppSettings
     {
         private static AppSettings _instance;
@@ -48,6 +69,8 @@ namespace MangaReader.Core
             // Définir le chemin par défaut des mangas
             var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             MangaFolderPath = Path.Combine(documentsPath, "Mangas");
+            Theme = "Dark";
+            ItemsPerPage = 20;
         }
 
         public static AppSettings Instance
@@ -76,16 +99,25 @@ namespace MangaReader.Core
                 if (File.Exists(_settingsPath))
                 {
                     var json = File.ReadAllText(_settingsPath);
-                    var loaded = JsonSerializer.Deserialize<AppSettings>(json);
+                    // Utiliser la classe DTO au lieu de AppSettings directement
+                    var loaded = JsonSerializer.Deserialize<AppSettingsDto>(json);
+
                     if (loaded != null)
                     {
-                        CopyProperties(loaded);
+                        CopyPropertiesFromDto(loaded);
+                        System.Diagnostics.Debug.WriteLine($"Settings chargés: Theme={Theme}, Path={MangaFolderPath}");
                     }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("Fichier settings.json non trouvé, utilisation des valeurs par défaut");
+                    // Sauvegarder les valeurs par défaut
+                    SaveAsync().Wait();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erreur lors du chargement des paramètres : {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Erreur chargement settings: {ex.Message}");
             }
         }
 
@@ -97,19 +129,49 @@ namespace MangaReader.Core
                 {
                     WriteIndented = true
                 };
-                var json = JsonSerializer.Serialize(this, options);
+
+                // Créer un objet DTO avec toutes les propriétés à sauvegarder
+                var settingsToSave = new AppSettingsDto
+                {
+                    MangaFolderPath = this.MangaFolderPath,
+                    Theme = this.Theme,
+                    SaveReadingPosition = this.SaveReadingPosition,
+                    ThumbnailCacheSize = this.ThumbnailCacheSize,
+                    EnableLazyLoading = this.EnableLazyLoading,
+                    DefaultZoomLevel = this.DefaultZoomLevel,
+                    LastExportPath = this.LastExportPath,
+                    LastImportPath = this.LastImportPath,
+                    SupportArchiveFiles = this.SupportArchiveFiles,
+                    ImageCacheSize = this.ImageCacheSize,
+                    PreloadNextPages = this.PreloadNextPages,
+                    PreloadPageCount = this.PreloadPageCount,
+                    ItemsPerPage = this.ItemsPerPage,
+                    DefaultSortBy = this.DefaultSortBy,
+                    SortAscending = this.SortAscending,
+                    CustomTheme = this.CustomTheme
+                };
+
+                var json = JsonSerializer.Serialize(settingsToSave, options);
                 await File.WriteAllTextAsync(_settingsPath, json);
+
+                System.Diagnostics.Debug.WriteLine($"Settings sauvegardés dans {_settingsPath}");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erreur lors de la sauvegarde des paramètres : {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Erreur sauvegarde settings: {ex.Message}");
             }
         }
 
-        private void CopyProperties(AppSettings source)
+        private void CopyPropertiesFromDto(AppSettingsDto source)
         {
-            MangaFolderPath = source.MangaFolderPath;
-            Theme = source.Theme;
+            if (source == null) return;
+
+            // Copier chaque propriété explicitement
+            if (!string.IsNullOrEmpty(source.MangaFolderPath))
+                MangaFolderPath = source.MangaFolderPath;
+            if (!string.IsNullOrEmpty(source.Theme))
+                Theme = source.Theme;
+
             SaveReadingPosition = source.SaveReadingPosition;
             ThumbnailCacheSize = source.ThumbnailCacheSize;
             EnableLazyLoading = source.EnableLazyLoading;
@@ -120,6 +182,9 @@ namespace MangaReader.Core
             ImageCacheSize = source.ImageCacheSize;
             PreloadNextPages = source.PreloadNextPages;
             PreloadPageCount = source.PreloadPageCount;
+            ItemsPerPage = source.ItemsPerPage;
+            DefaultSortBy = source.DefaultSortBy;
+            SortAscending = source.SortAscending;
 
             if (source.CustomTheme != null)
                 CustomTheme = source.CustomTheme;

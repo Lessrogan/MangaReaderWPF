@@ -20,7 +20,10 @@ namespace MangaReader
                 AppSettings.Instance.Load();
 
                 // Appliquer le thème sauvegardé
-                ThemeManager.ApplyTheme(AppSettings.Instance.Theme);
+                if (!string.IsNullOrEmpty(AppSettings.Instance.Theme))
+                {
+                    ThemeManager.ApplyTheme(AppSettings.Instance.Theme);
+                }
             }
             catch (Exception ex)
             {
@@ -61,6 +64,13 @@ namespace MangaReader
         protected override void OnExit(ExitEventArgs e)
         {
             // Nettoyer le cache temporaire des archives
+            try
+            {
+                AppSettings.Instance.SaveAsync().Wait();
+            }
+            catch { }
+
+            // Nettoyer le cache temporaire
             try
             {
                 var tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "MangaReader");

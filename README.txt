@@ -199,6 +199,6 @@ Consultez la section Résolution de problèmes
 - Dans les manags lu recemment (si le manga n'est pas dans la pagination courante l'image n'est pas affiché)
 - sauvegarde des thèmes ne fonctionne pas
 - trier par note ? aucun moyen de mettre de snotes, par auteur, on rentre ou le nom de l'auteur ? par date fonctionne pas
-- bug; si en mode resize, la 1ere image n'apparait pas
+-Ajouter un systeme de lien entre mangas pour qui se suivent lors de la lecture? comment faire et où de manière UI/UX
 Version : 2.0.0
 Dernière mise à jour : Décembre 2024
