@@ -186,11 +186,7 @@ Consultez la section Résolution de problèmes
 //TODO
 
 - Localization des trads
-- Actualisation automatique lors d'un changement de répertoire // garder le bouton actualiser si on rajoute des fichiers dans le repertoire
-- Paramètres 
-	-> sauvegarder le thèmes choisit
-	-> nombre de prévisualisation (doit afficher toutes les images) 
-	-> TODO vérif import et export
+- TODO vérif import et export
 - Check quoi faire avec le compteur quand defilement
 - Todo check filtre ET tri
 - Faire ne sorte de ne plus avoir besoin de tags.json (charger en base au 1er demarrage des tags (voir ne meme pas faire ça et se contenter destags que l'on peut mettre en paramétrage revert commit 9f6d5e0)) ->en a gardé, faut juste changer les tags de base
