@@ -1086,20 +1086,21 @@ namespace MangaReader
 
         private async void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
+            // Sauvegarder l'ancien chemin AVANT d'ouvrir la fenêtre
+            var oldMangaFolderPath = settings.MangaFolderPath;
+
             var settingsWindow = new SettingsWindow();
             var result = settingsWindow.ShowDialog();
 
             if (result == true)
             {
                 // Recharger si le dossier a changé
-                if (settings.MangaFolderPath != AppSettings.Instance.MangaFolderPath)
+                if (oldMangaFolderPath != settings.MangaFolderPath)
                 {
-                    settings = AppSettings.Instance;
                     await LoadMangasAsync();
                 }
 
                 await LoadTagsAsync();
-
                 UpdateCacheStats();
             }
         }
