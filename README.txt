@@ -196,6 +196,7 @@ Consultez la section Résolution de problèmes
 - Faire ne sorte de ne plus avoir besoin de tags.json (charger en base au 1er demarrage des tags (voir ne meme pas faire ça et se contenter destags que l'on peut mettre en paramétrage revert commit 9f6d5e0)) ->en a gardé, faut juste changer les tags de base
 - Fair en sorte de ne plus avoir besoin de save les modifs d'un mangas
 - trier par note ? aucun moyen de mettre de snotes, par auteur, on rentre ou le nom de l'auteur ? par date fonctionne pas
--Ajouter un systeme de lien entre mangas pour qui se suivent lors de la lecture? comment faire et où de manière UI/UX
+- Ajouter un systeme de lien entre mangas pour qui se suivent lors de la lecture? comment faire et où de manière UI/UX
+- Tags -> onpeut ajouer n'importe quoi, pas plusieurs en meme temps, pas de rehcerche dedans , besoin d'appuyer sur ajouter
 Version : 2.0.0
 Dernière mise à jour : Décembre 2024
