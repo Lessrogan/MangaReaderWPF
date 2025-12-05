@@ -193,11 +193,8 @@ Consultez la section Résolution de problèmes
 	-> TODO vérif import et export
 - Check quoi faire avec le compteur quand defilement
 - Todo check filtre ET tri
-- Todo fix l'actualisation vide les recemment lu
-- Faire ne sorte de ne plus avoir besoin de tags.json (charger en base au 1er demarrage des tags (voir ne meme pas faire ça et se contenter destags que l'on peut mettre en paramétrage revert commit 9f6d5e0))
+- Faire ne sorte de ne plus avoir besoin de tags.json (charger en base au 1er demarrage des tags (voir ne meme pas faire ça et se contenter destags que l'on peut mettre en paramétrage revert commit 9f6d5e0)) ->en a gardé, faut juste changer les tags de base
 - Fair en sorte de ne plus avoir besoin de save les modifs d'un mangas
-- Dans les manags lu recemment (si le manga n'est pas dans la pagination courante l'image n'est pas affiché)
-- sauvegarde des thèmes ne fonctionne pas
 - trier par note ? aucun moyen de mettre de snotes, par auteur, on rentre ou le nom de l'auteur ? par date fonctionne pas
 -Ajouter un systeme de lien entre mangas pour qui se suivent lors de la lecture? comment faire et où de manière UI/UX
 Version : 2.0.0

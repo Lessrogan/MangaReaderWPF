@@ -706,6 +706,18 @@ namespace MangaReader
             }
         }
 
+        // NOUVELLE MÉTHODE : Charger les images pour les mangas récents
+        private async Task LoadRecentMangasImagesAsync()
+        {
+            var mangasToLoad = recentMangas.Where(m => m.CoverImage == null).ToList();
+            System.Diagnostics.Debug.WriteLine($"Chargement de {mangasToLoad.Count} images pour les mangas récents");
+
+            foreach (var manga in mangasToLoad)
+            {
+                manga.CoverImage = await LoadCoverImageAsync(manga.FolderPath, manga.IsArchive);
+            }
+        }
+
         private async Task RefreshRecentMangas()
         {
             try
@@ -728,6 +740,9 @@ namespace MangaReader
                             }
                         }
                     }
+
+                    // CORRECTION : Charger les images pour les mangas récents
+                    await LoadRecentMangasImagesAsync();
                 }
 
                 UpdateUI();
